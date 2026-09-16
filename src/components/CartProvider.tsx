@@ -2,12 +2,15 @@
 
 import { createContext, useContext, useMemo, useState } from "react"
 import { z } from "zod"
+import { ShoppingCart } from "lucide-react"
+import Link from "next/link"
 import { formatPrice } from "@/lib/pricing"
 import type { Price } from "@/types/product"
 
 type CartItem = {
   id: string
   productId: string
+  variantId: string
   productTitle: string
   variantTitle: string
   price: Price
@@ -26,12 +29,18 @@ type CartContextValue = {
   setQuantity: (id: string, quantity: number) => void
 }
 
+type CheckoutField = "name" | "address" | "city" | "postalCode"
+
+function currentCurrency(items: CartItem[]): string | undefined {
+  return items[0]?.price.currency_code
+}
+
 const CartContext = createContext<CartContextValue | null>(null)
 const shippingSchema = z.object({
-  name: z.string().trim().min(2, "Enter your full name."),
-  address: z.string().trim().min(5, "Enter a valid address."),
-  city: z.string().trim().min(2, "Enter your city."),
-  postalCode: z.string().trim().min(3, "Enter a valid postal code."),
+  name: z.string().trim().min(2, "Enter your full name, at least 2 characters."),
+  address: z.string().trim().min(5, "Enter your street address, at least 5 characters."),
+  city: z.string().trim().min(2, "Enter your city, at least 2 characters."),
+  postalCode: z.string().trim().min(3, "Enter your postal code, at least 3 characters."),
 })
 
 export function useCart() {
@@ -45,8 +54,10 @@ export function useCart() {
 export default function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState("")
-  const [checkoutError, setCheckoutError] = useState("")
+  const [checkoutErrors, setCheckoutErrors] = useState<Partial<Record<CheckoutField, string>>>({})
+  const [currencyError, setCurrencyError] = useState("")
 
   const cart = useMemo<CartContextValue>(() => {
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
@@ -59,8 +70,13 @@ export default function CartProvider({ children }: { children: React.ReactNode }
       itemCount,
       total,
       addToCart: (input) => {
+        const cartCurrency = currentCurrency(items)
+        if (cartCurrency && cartCurrency !== input.price.currency_code) {
+          setCurrencyError("Items in one cart must use the same currency.")
+          return
+        }
         setItems((current) => {
-          const existing = current.find((item) => item.id === `${input.productId}:${input.price.amount}:${input.variantTitle}`)
+          const existing = current.find((item) => item.id === input.variantId)
           if (existing) {
             return current.map((item) =>
               item.id === existing.id
@@ -72,13 +88,15 @@ export default function CartProvider({ children }: { children: React.ReactNode }
             ...current,
             {
               ...input,
-              id: `${input.productId}:${input.price.amount}:${input.variantTitle}`,
+              id: input.variantId,
               quantity: 1,
             },
           ]
         })
         setCheckoutMessage("")
-        setCheckoutError("")
+        setCheckoutErrors({})
+        setCurrencyError("")
+        setIsCheckoutOpen(false)
         setIsOpen(true)
       },
       removeFromCart: (id) => setItems((current) => current.filter((item) => item.id !== id)),
@@ -86,7 +104,12 @@ export default function CartProvider({ children }: { children: React.ReactNode }
         setItems((current) =>
           current.map((item) =>
             item.id === id
-              ? { ...item, quantity: Math.max(1, Math.min(quantity, item.inventoryQuantity)) }
+              ? {
+                  ...item,
+                  quantity: Number.isFinite(quantity)
+                    ? Math.max(1, Math.min(Math.floor(quantity), item.inventoryQuantity))
+                    : item.quantity,
+                }
               : item
           )
         ),
@@ -98,11 +121,25 @@ export default function CartProvider({ children }: { children: React.ReactNode }
     const formData = new FormData(event.currentTarget)
     const result = shippingSchema.safeParse(Object.fromEntries(formData))
     if (!result.success) {
-      setCheckoutError(result.error.issues[0]?.message ?? "Check your shipping details.")
+      const errors = result.error.issues.reduce<Partial<Record<CheckoutField, string>>>(
+        (fieldErrors, issue) => {
+          const field = issue.path[0]
+          if (typeof field === "string" && field in shippingSchema.shape) {
+            fieldErrors[field as CheckoutField] = issue.message
+          }
+          return fieldErrors
+        },
+        {}
+      )
+      setCheckoutErrors(errors)
       setCheckoutMessage("")
+      const firstInvalidField = Object.keys(errors)[0]
+      if (firstInvalidField) {
+        document.getElementById(`checkout-${firstInvalidField}`)?.focus()
+      }
       return
     }
-    setCheckoutError("")
+    setCheckoutErrors({})
     setCheckoutMessage("Order confirmed. Thank you for your purchase!")
     setItems([])
     event.currentTarget.reset()
@@ -110,15 +147,24 @@ export default function CartProvider({ children }: { children: React.ReactNode }
 
   return (
     <CartContext.Provider value={cart}>
+      <header className="sticky top-0 z-40 border-b bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4">
+          <Link href="/products" className="font-semibold tracking-tight">
+            Youleap Store
+          </Link>
+        <button
+          type="button"
+          aria-label={`View cart with ${cart.itemCount} items`}
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((open) => !open)}
+          className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm"
+        >
+          <ShoppingCart size={18} aria-hidden="true" />
+          View cart ({cart.itemCount})
+        </button>
+        </div>
+      </header>
       {children}
-      <button
-        type="button"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((open) => !open)}
-        className="fixed right-4 top-4 z-40 rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-lg"
-      >
-        Cart ({cart.itemCount})
-      </button>
       {isOpen && (
         <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto border-l bg-white p-5 shadow-2xl">
           <div className="mb-6 flex items-center justify-between gap-4">
@@ -129,8 +175,13 @@ export default function CartProvider({ children }: { children: React.ReactNode }
           </div>
           {cart.items.length === 0 ? (
             <>
-              <p className="text-gray-600">Your cart is empty.</p>
-              {checkoutMessage && <p role="status" className="mt-4 text-sm text-green-700">{checkoutMessage}</p>}
+              {checkoutMessage ? (
+                <p role="status" className="text-sm text-green-700">
+                  {checkoutMessage}
+                </p>
+              ) : (
+                <p className="text-gray-600">Your cart is empty.</p>
+              )}
             </>
           ) : (
             <>
@@ -161,16 +212,64 @@ export default function CartProvider({ children }: { children: React.ReactNode }
                   </li>
                 ))}
               </ul>
+              {currencyError && <p role="alert" className="mt-4 text-sm text-red-700">{currencyError}</p>}
               <p className="mt-6 text-right text-lg font-bold">Total: {formatPrice({ amount: cart.total, currency_code: cart.items[0].price.currency_code })}</p>
+              {!isCheckoutOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setIsCheckoutOpen(true)}
+                  className="mt-6 w-full rounded-md bg-black px-4 py-3 text-white"
+                >
+                  Checkout
+                </button>
+              ) : (
               <form onSubmit={handleCheckout} className="mt-6 space-y-3">
                 <h3 className="font-semibold">Checkout</h3>
-                {(["name", "address", "city", "postalCode"] as const).map((field) => (
-                  <input key={field} name={field} placeholder={field === "postalCode" ? "Postal code" : field[0].toUpperCase() + field.slice(1)} className="w-full rounded-md border px-3 py-2" />
+                {([
+                  ["name", "Full name", "name"],
+                  ["address", "Address", "street-address"],
+                  ["city", "City", "address-level2"],
+                  ["postalCode", "Postal code", "postal-code"],
+                ] as const).map(([field, label, autoComplete]) => (
+                  <div key={field}>
+                    <label className="block text-sm font-medium" htmlFor={`checkout-${field}`}>
+                      {label}
+                    </label>
+                    <input
+                      id={`checkout-${field}`}
+                      name={field}
+                      placeholder={
+                        field === "name"
+                          ? "e.g. Jane Doe"
+                          : field === "address"
+                            ? "e.g. 12 Main Street"
+                            : field === "city"
+                              ? "e.g. Tel Aviv"
+                              : "e.g. 12345"
+                      }
+                      autoComplete={autoComplete}
+                      required
+                      aria-invalid={Boolean(checkoutErrors[field])}
+                      aria-describedby={checkoutErrors[field] ? `${field}-error` : undefined}
+                      onChange={() =>
+                        setCheckoutErrors((current) => ({
+                          ...current,
+                          [field]: undefined,
+                        }))
+                      }
+                      className={`w-full rounded-md border px-3 py-2 ${checkoutErrors[field] ? "border-red-600 ring-1 ring-red-600" : ""}`}
+                    />
+                    {checkoutErrors[field] && (
+                      <p id={`${field}-error`} role="alert" className="mt-1 text-sm text-red-700">
+                        {checkoutErrors[field]}
+                      </p>
+                    )}
+                  </div>
                 ))}
-                {checkoutError && <p role="alert" className="text-sm text-red-700">{checkoutError}</p>}
                 {checkoutMessage && <p role="status" className="text-sm text-green-700">{checkoutMessage}</p>}
                 <button type="submit" className="w-full rounded-md bg-black px-4 py-3 text-white">Complete checkout</button>
               </form>
+              )}
             </>
           )}
         </aside>
