@@ -1,0 +1,562 @@
+[
+  {
+    "id": "prod_01",
+    "title": "Classic Wireless Headphones",
+    "handle": "classic-wireless-headphones",
+    "description": "Premium over-ear wireless headphones with active noise cancellation, 30-hour battery life, and ultra-comfortable memory foam cushions. Perfect for music lovers and remote workers.",
+    "thumbnail": "https://picsum.photos/seed/headphones/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/headphones1/800/800" },
+      { "url": "https://picsum.photos/seed/headphones2/800/800" },
+      { "url": "https://picsum.photos/seed/headphones3/800/800" }
+    ],
+    "variants": [
+      { "id": "var_01a", "title": "Black", "sku": "HP-BLK-01", "prices": [{ "amount": 29900, "currency_code": "ILS" }], "inventory_quantity": 25 },
+      { "id": "var_01b", "title": "White", "sku": "HP-WHT-01", "prices": [{ "amount": 29900, "currency_code": "ILS" }], "inventory_quantity": 12 },
+      { "id": "var_01c", "title": "Navy Blue", "sku": "HP-NVY-01", "prices": [{ "amount": 31900, "currency_code": "ILS" }], "inventory_quantity": 0 }
+    ],
+    "options": [
+      { "id": "opt_color_01", "title": "Color", "values": ["Black", "White", "Navy Blue"] }
+    ],
+    "tags": [{ "value": "electronics" }, { "value": "audio" }],
+    "collection": { "id": "col_01", "title": "Audio", "handle": "audio" },
+    "created_at": "2026-01-15T10:00:00Z"
+  },
+  {
+    "id": "prod_02",
+    "title": "Ergonomic Office Chair",
+    "handle": "ergonomic-office-chair",
+    "description": "Fully adjustable ergonomic mesh office chair with lumbar support, adjustable armrests, and breathable mesh back. Supports up to 150kg.",
+    "thumbnail": "https://picsum.photos/seed/chair/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/chair1/800/800" },
+      { "url": "https://picsum.photos/seed/chair2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_02a", "title": "Gray", "sku": "CH-GRY-01", "prices": [{ "amount": 149900, "currency_code": "ILS" }], "inventory_quantity": 8 },
+      { "id": "var_02b", "title": "Black", "sku": "CH-BLK-01", "prices": [{ "amount": 149900, "currency_code": "ILS" }], "inventory_quantity": 15 }
+    ],
+    "options": [
+      { "id": "opt_color_02", "title": "Color", "values": ["Gray", "Black"] }
+    ],
+    "tags": [{ "value": "furniture" }, { "value": "office" }],
+    "collection": { "id": "col_02", "title": "Office", "handle": "office" },
+    "created_at": "2026-02-01T10:00:00Z"
+  },
+  {
+    "id": "prod_03",
+    "title": "Smart Water Bottle",
+    "handle": "smart-water-bottle",
+    "description": "Temperature-tracking smart water bottle with LED display, hydration reminders, and vacuum insulation. Keeps drinks cold 24h or hot 12h.",
+    "thumbnail": "https://picsum.photos/seed/bottle/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/bottle1/800/800" },
+      { "url": "https://picsum.photos/seed/bottle2/800/800" },
+      { "url": "https://picsum.photos/seed/bottle3/800/800" }
+    ],
+    "variants": [
+      { "id": "var_03a", "title": "500ml - White", "sku": "WB-500-WHT", "prices": [{ "amount": 17900, "currency_code": "ILS" }], "inventory_quantity": 50 },
+      { "id": "var_03b", "title": "500ml - Black", "sku": "WB-500-BLK", "prices": [{ "amount": 17900, "currency_code": "ILS" }], "inventory_quantity": 30 },
+      { "id": "var_03c", "title": "750ml - White", "sku": "WB-750-WHT", "prices": [{ "amount": 22900, "currency_code": "ILS" }], "inventory_quantity": 20 },
+      { "id": "var_03d", "title": "750ml - Black", "sku": "WB-750-BLK", "prices": [{ "amount": 22900, "currency_code": "ILS" }], "inventory_quantity": 0 }
+    ],
+    "options": [
+      { "id": "opt_size_03", "title": "Size", "values": ["500ml", "750ml"] },
+      { "id": "opt_color_03", "title": "Color", "values": ["White", "Black"] }
+    ],
+    "tags": [{ "value": "accessories" }, { "value": "smart" }],
+    "collection": { "id": "col_03", "title": "Lifestyle", "handle": "lifestyle" },
+    "created_at": "2026-02-10T10:00:00Z"
+  },
+  {
+    "id": "prod_04",
+    "title": "Mechanical Keyboard Pro",
+    "handle": "mechanical-keyboard-pro",
+    "description": "Compact 75% mechanical keyboard with hot-swappable switches, RGB backlighting, and USB-C connectivity. PBT keycaps included.",
+    "thumbnail": "https://picsum.photos/seed/keyboard/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/keyboard1/800/800" },
+      { "url": "https://picsum.photos/seed/keyboard2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_04a", "title": "Red Switches", "sku": "KB-RED-01", "prices": [{ "amount": 44900, "currency_code": "ILS" }], "inventory_quantity": 18 },
+      { "id": "var_04b", "title": "Brown Switches", "sku": "KB-BRN-01", "prices": [{ "amount": 44900, "currency_code": "ILS" }], "inventory_quantity": 22 },
+      { "id": "var_04c", "title": "Blue Switches", "sku": "KB-BLU-01", "prices": [{ "amount": 44900, "currency_code": "ILS" }], "inventory_quantity": 10 }
+    ],
+    "options": [
+      { "id": "opt_switch_04", "title": "Switch Type", "values": ["Red Switches", "Brown Switches", "Blue Switches"] }
+    ],
+    "tags": [{ "value": "electronics" }, { "value": "peripherals" }],
+    "collection": { "id": "col_01", "title": "Audio", "handle": "audio" },
+    "created_at": "2026-02-20T10:00:00Z"
+  },
+  {
+    "id": "prod_05",
+    "title": "Minimalist Desk Lamp",
+    "handle": "minimalist-desk-lamp",
+    "description": "Sleek LED desk lamp with 5 brightness levels, 3 color temperatures, and wireless charging base. Touch-sensitive controls.",
+    "thumbnail": "https://picsum.photos/seed/lamp/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/lamp1/800/800" },
+      { "url": "https://picsum.photos/seed/lamp2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_05a", "title": "Matte Black", "sku": "LMP-BLK-01", "prices": [{ "amount": 34900, "currency_code": "ILS" }], "inventory_quantity": 14 },
+      { "id": "var_05b", "title": "Silver", "sku": "LMP-SLV-01", "prices": [{ "amount": 34900, "currency_code": "ILS" }], "inventory_quantity": 9 }
+    ],
+    "options": [
+      { "id": "opt_finish_05", "title": "Finish", "values": ["Matte Black", "Silver"] }
+    ],
+    "tags": [{ "value": "lighting" }, { "value": "office" }],
+    "collection": { "id": "col_02", "title": "Office", "handle": "office" },
+    "created_at": "2026-03-01T10:00:00Z"
+  },
+  {
+    "id": "prod_06",
+    "title": "Canvas Backpack",
+    "handle": "canvas-backpack",
+    "description": "Durable canvas backpack with padded laptop compartment (fits up to 15\"), water-resistant coating, and hidden anti-theft pocket.",
+    "thumbnail": "https://picsum.photos/seed/backpack/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/backpack1/800/800" },
+      { "url": "https://picsum.photos/seed/backpack2/800/800" },
+      { "url": "https://picsum.photos/seed/backpack3/800/800" }
+    ],
+    "variants": [
+      { "id": "var_06a", "title": "Olive Green", "sku": "BP-OLV-01", "prices": [{ "amount": 24900, "currency_code": "ILS" }], "inventory_quantity": 35 },
+      { "id": "var_06b", "title": "Charcoal", "sku": "BP-CHR-01", "prices": [{ "amount": 24900, "currency_code": "ILS" }], "inventory_quantity": 28 },
+      { "id": "var_06c", "title": "Navy", "sku": "BP-NVY-01", "prices": [{ "amount": 26900, "currency_code": "ILS" }], "inventory_quantity": 15 }
+    ],
+    "options": [
+      { "id": "opt_color_06", "title": "Color", "values": ["Olive Green", "Charcoal", "Navy"] }
+    ],
+    "tags": [{ "value": "bags" }, { "value": "accessories" }],
+    "collection": { "id": "col_03", "title": "Lifestyle", "handle": "lifestyle" },
+    "created_at": "2026-03-05T10:00:00Z"
+  },
+  {
+    "id": "prod_07",
+    "title": "Portable Bluetooth Speaker",
+    "handle": "portable-bluetooth-speaker",
+    "description": "Waterproof (IPX7) portable speaker with 360-degree sound, 20-hour battery, and built-in microphone for calls. Pairs with up to 2 devices.",
+    "thumbnail": "https://picsum.photos/seed/speaker/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/speaker1/800/800" },
+      { "url": "https://picsum.photos/seed/speaker2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_07a", "title": "Black", "sku": "SPK-BLK-01", "prices": [{ "amount": 39900, "currency_code": "ILS" }], "inventory_quantity": 20 },
+      { "id": "var_07b", "title": "Teal", "sku": "SPK-TEL-01", "prices": [{ "amount": 39900, "currency_code": "ILS" }], "inventory_quantity": 11 },
+      { "id": "var_07c", "title": "Red", "sku": "SPK-RED-01", "prices": [{ "amount": 39900, "currency_code": "ILS" }], "inventory_quantity": 7 }
+    ],
+    "options": [
+      { "id": "opt_color_07", "title": "Color", "values": ["Black", "Teal", "Red"] }
+    ],
+    "tags": [{ "value": "electronics" }, { "value": "audio" }],
+    "collection": { "id": "col_01", "title": "Audio", "handle": "audio" },
+    "created_at": "2026-03-10T10:00:00Z"
+  },
+  {
+    "id": "prod_08",
+    "title": "Plant-Based Protein Powder",
+    "handle": "plant-based-protein-powder",
+    "description": "Organic plant-based protein blend (pea, rice, hemp) with 25g protein per serving. No artificial sweeteners. Available in multiple flavors.",
+    "thumbnail": "https://picsum.photos/seed/protein/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/protein1/800/800" },
+      { "url": "https://picsum.photos/seed/protein2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_08a", "title": "Chocolate - 1kg", "sku": "PP-CHO-1K", "prices": [{ "amount": 18900, "currency_code": "ILS" }], "inventory_quantity": 45 },
+      { "id": "var_08b", "title": "Vanilla - 1kg", "sku": "PP-VAN-1K", "prices": [{ "amount": 18900, "currency_code": "ILS" }], "inventory_quantity": 38 },
+      { "id": "var_08c", "title": "Chocolate - 2kg", "sku": "PP-CHO-2K", "prices": [{ "amount": 32900, "currency_code": "ILS" }], "inventory_quantity": 20 },
+      { "id": "var_08d", "title": "Vanilla - 2kg", "sku": "PP-VAN-2K", "prices": [{ "amount": 32900, "currency_code": "ILS" }], "inventory_quantity": 0 }
+    ],
+    "options": [
+      { "id": "opt_flavor_08", "title": "Flavor", "values": ["Chocolate", "Vanilla"] },
+      { "id": "opt_size_08", "title": "Size", "values": ["1kg", "2kg"] }
+    ],
+    "tags": [{ "value": "nutrition" }, { "value": "fitness" }],
+    "collection": { "id": "col_04", "title": "Health", "handle": "health" },
+    "created_at": "2026-03-15T10:00:00Z"
+  },
+  {
+    "id": "prod_09",
+    "title": "Ceramic Pour-Over Coffee Set",
+    "handle": "ceramic-pour-over-coffee-set",
+    "description": "Handcrafted ceramic pour-over dripper with matching server and 100 paper filters. Makes 1-3 cups of perfectly brewed coffee.",
+    "thumbnail": "https://picsum.photos/seed/coffee/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/coffee1/800/800" },
+      { "url": "https://picsum.photos/seed/coffee2/800/800" },
+      { "url": "https://picsum.photos/seed/coffee3/800/800" }
+    ],
+    "variants": [
+      { "id": "var_09a", "title": "White", "sku": "CF-WHT-01", "prices": [{ "amount": 21900, "currency_code": "ILS" }], "inventory_quantity": 12 },
+      { "id": "var_09b", "title": "Matte Black", "sku": "CF-BLK-01", "prices": [{ "amount": 23900, "currency_code": "ILS" }], "inventory_quantity": 8 }
+    ],
+    "options": [
+      { "id": "opt_color_09", "title": "Color", "values": ["White", "Matte Black"] }
+    ],
+    "tags": [{ "value": "kitchen" }, { "value": "coffee" }],
+    "collection": { "id": "col_03", "title": "Lifestyle", "handle": "lifestyle" },
+    "created_at": "2026-03-20T10:00:00Z"
+  },
+  {
+    "id": "prod_10",
+    "title": "Wool Blend Throw Blanket",
+    "handle": "wool-blend-throw-blanket",
+    "description": "Luxuriously soft wool-blend throw blanket (130x170cm). Machine washable with herringbone pattern. Perfect for couch or bed.",
+    "thumbnail": "https://picsum.photos/seed/blanket/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/blanket1/800/800" },
+      { "url": "https://picsum.photos/seed/blanket2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_10a", "title": "Cream", "sku": "BL-CRM-01", "prices": [{ "amount": 27900, "currency_code": "ILS" }], "inventory_quantity": 16 },
+      { "id": "var_10b", "title": "Gray", "sku": "BL-GRY-01", "prices": [{ "amount": 27900, "currency_code": "ILS" }], "inventory_quantity": 22 },
+      { "id": "var_10c", "title": "Dusty Rose", "sku": "BL-RSE-01", "prices": [{ "amount": 29900, "currency_code": "ILS" }], "inventory_quantity": 5 }
+    ],
+    "options": [
+      { "id": "opt_color_10", "title": "Color", "values": ["Cream", "Gray", "Dusty Rose"] }
+    ],
+    "tags": [{ "value": "home" }, { "value": "textiles" }],
+    "collection": { "id": "col_05", "title": "Home", "handle": "home" },
+    "created_at": "2026-03-25T10:00:00Z"
+  },
+  {
+    "id": "prod_11",
+    "title": "USB-C Docking Station",
+    "handle": "usb-c-docking-station",
+    "description": "13-in-1 USB-C docking station with dual HDMI, 100W passthrough charging, Gigabit Ethernet, SD card reader, and 4 USB-A ports.",
+    "thumbnail": "https://picsum.photos/seed/dock/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/dock1/800/800" },
+      { "url": "https://picsum.photos/seed/dock2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_11a", "title": "Space Gray", "sku": "DK-GRY-01", "prices": [{ "amount": 54900, "currency_code": "ILS" }], "inventory_quantity": 10 }
+    ],
+    "options": [
+      { "id": "opt_color_11", "title": "Color", "values": ["Space Gray"] }
+    ],
+    "tags": [{ "value": "electronics" }, { "value": "peripherals" }],
+    "collection": { "id": "col_02", "title": "Office", "handle": "office" },
+    "created_at": "2026-04-01T10:00:00Z"
+  },
+  {
+    "id": "prod_12",
+    "title": "Yoga Mat Premium",
+    "handle": "yoga-mat-premium",
+    "description": "Extra-thick (6mm) non-slip yoga mat made from natural rubber with alignment lines. Includes carrying strap. 183x68cm.",
+    "thumbnail": "https://picsum.photos/seed/yoga/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/yoga1/800/800" },
+      { "url": "https://picsum.photos/seed/yoga2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_12a", "title": "Midnight Blue", "sku": "YM-BLU-01", "prices": [{ "amount": 19900, "currency_code": "ILS" }], "inventory_quantity": 30 },
+      { "id": "var_12b", "title": "Forest Green", "sku": "YM-GRN-01", "prices": [{ "amount": 19900, "currency_code": "ILS" }], "inventory_quantity": 25 },
+      { "id": "var_12c", "title": "Lavender", "sku": "YM-LVD-01", "prices": [{ "amount": 19900, "currency_code": "ILS" }], "inventory_quantity": 18 }
+    ],
+    "options": [
+      { "id": "opt_color_12", "title": "Color", "values": ["Midnight Blue", "Forest Green", "Lavender"] }
+    ],
+    "tags": [{ "value": "fitness" }, { "value": "yoga" }],
+    "collection": { "id": "col_04", "title": "Health", "handle": "health" },
+    "created_at": "2026-04-05T10:00:00Z"
+  },
+  {
+    "id": "prod_13",
+    "title": "Stainless Steel Cookware Set",
+    "handle": "stainless-steel-cookware-set",
+    "description": "10-piece tri-ply stainless steel cookware set with ergonomic handles and tempered glass lids. Induction-compatible and dishwasher safe.",
+    "thumbnail": "https://picsum.photos/seed/cookware/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/cookware1/800/800" },
+      { "url": "https://picsum.photos/seed/cookware2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_13a", "title": "Silver", "sku": "CW-SLV-01", "prices": [{ "amount": 89900, "currency_code": "ILS" }], "inventory_quantity": 12 }
+    ],
+    "options": [
+      { "id": "opt_color_13", "title": "Color", "values": ["Silver"] }
+    ],
+    "tags": [{ "value": "kitchen" }, { "value": "home" }],
+    "collection": { "id": "col_05", "title": "Home", "handle": "home" },
+    "created_at": "2026-04-10T10:00:00Z"
+  },
+  {
+    "id": "prod_14",
+    "title": "Running Shoes Lightweight",
+    "handle": "running-shoes-lightweight",
+    "description": "Breathable lightweight running shoes with responsive foam cushioning and a flexible knit upper. Ideal for road running and daily training.",
+    "thumbnail": "https://picsum.photos/seed/shoes/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/shoes1/800/800" },
+      { "url": "https://picsum.photos/seed/shoes2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_14a", "title": "EU 42 - Black", "sku": "RS-42-BLK", "prices": [{ "amount": 42900, "currency_code": "ILS" }], "inventory_quantity": 20 },
+      { "id": "var_14b", "title": "EU 43 - Black", "sku": "RS-43-BLK", "prices": [{ "amount": 42900, "currency_code": "ILS" }], "inventory_quantity": 15 },
+      { "id": "var_14c", "title": "EU 44 - Black", "sku": "RS-44-BLK", "prices": [{ "amount": 42900, "currency_code": "ILS" }], "inventory_quantity": 8 }
+    ],
+    "options": [
+      { "id": "opt_size_14", "title": "Size", "values": ["EU 42", "EU 43", "EU 44"] }
+    ],
+    "tags": [{ "value": "fitness" }, { "value": "footwear" }],
+    "collection": { "id": "col_04", "title": "Health", "handle": "health" },
+    "created_at": "2026-04-15T10:00:00Z"
+  },
+  {
+    "id": "prod_15",
+    "title": "Wireless Charging Pad",
+    "handle": "wireless-charging-pad",
+    "description": "Fast 15W Qi wireless charging pad with anti-slip surface and LED indicator. Charges phones and earbuds through most cases.",
+    "thumbnail": "https://picsum.photos/seed/charger/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/charger1/800/800" },
+      { "url": "https://picsum.photos/seed/charger2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_15a", "title": "Black", "sku": "WC-BLK-01", "prices": [{ "amount": 12900, "currency_code": "ILS" }], "inventory_quantity": 40 },
+      { "id": "var_15b", "title": "White", "sku": "WC-WHT-01", "prices": [{ "amount": 12900, "currency_code": "ILS" }], "inventory_quantity": 33 }
+    ],
+    "options": [
+      { "id": "opt_color_15", "title": "Color", "values": ["Black", "White"] }
+    ],
+    "tags": [{ "value": "electronics" }, { "value": "accessories" }],
+    "collection": { "id": "col_02", "title": "Office", "handle": "office" },
+    "created_at": "2026-04-20T10:00:00Z"
+  },
+  {
+    "id": "prod_16",
+    "title": "Scented Soy Candle Trio",
+    "handle": "scented-soy-candle-trio",
+    "description": "Set of three hand-poured soy wax candles with cotton wicks. Lavender, sandalwood, and sea salt scents. 40-hour burn time each.",
+    "thumbnail": "https://picsum.photos/seed/candle/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/candle1/800/800" },
+      { "url": "https://picsum.photos/seed/candle2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_16a", "title": "Mixed Scents", "sku": "CN-MIX-01", "prices": [{ "amount": 15900, "currency_code": "ILS" }], "inventory_quantity": 27 }
+    ],
+    "options": [
+      { "id": "opt_scent_16", "title": "Scent", "values": ["Mixed Scents"] }
+    ],
+    "tags": [{ "value": "home" }, { "value": "decor" }],
+    "collection": { "id": "col_05", "title": "Home", "handle": "home" },
+    "created_at": "2026-04-25T10:00:00Z"
+  },
+  {
+    "id": "prod_17",
+    "title": "Compact Travel Tripod",
+    "handle": "compact-travel-tripod",
+    "description": "Lightweight aluminum travel tripod with ball head, quick-release plate, and folded length of just 35cm. Supports up to 8kg.",
+    "thumbnail": "https://picsum.photos/seed/tripod/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/tripod1/800/800" },
+      { "url": "https://picsum.photos/seed/tripod2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_17a", "title": "Black", "sku": "TR-BLK-01", "prices": [{ "amount": 34900, "currency_code": "ILS" }], "inventory_quantity": 14 },
+      { "id": "var_17b", "title": "Gunmetal", "sku": "TR-GUN-01", "prices": [{ "amount": 36900, "currency_code": "ILS" }], "inventory_quantity": 6 }
+    ],
+    "options": [
+      { "id": "opt_color_17", "title": "Color", "values": ["Black", "Gunmetal"] }
+    ],
+    "tags": [{ "value": "electronics" }, { "value": "photography" }],
+    "collection": { "id": "col_01", "title": "Audio", "handle": "audio" },
+    "created_at": "2026-05-01T10:00:00Z"
+  },
+  {
+    "id": "prod_18",
+    "title": "Bamboo Cutting Board Set",
+    "handle": "bamboo-cutting-board-set",
+    "description": "Set of three organic bamboo cutting boards in small, medium, and large sizes with juice grooves and easy-grip handles.",
+    "thumbnail": "https://picsum.photos/seed/cuttingboard/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/cuttingboard1/800/800" },
+      { "url": "https://picsum.photos/seed/cuttingboard2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_18a", "title": "Natural", "sku": "CB-NAT-01", "prices": [{ "amount": 13900, "currency_code": "ILS" }], "inventory_quantity": 31 }
+    ],
+    "options": [
+      { "id": "opt_finish_18", "title": "Finish", "values": ["Natural"] }
+    ],
+    "tags": [{ "value": "kitchen" }, { "value": "home" }],
+    "collection": { "id": "col_05", "title": "Home", "handle": "home" },
+    "created_at": "2026-05-05T10:00:00Z"
+  },
+  {
+    "id": "prod_19",
+    "title": "Noise-Isolating Earbuds",
+    "handle": "noise-isolating-earbuds",
+    "description": "True wireless earbuds with active noise cancellation, transparency mode, and 28-hour total battery with the charging case.",
+    "thumbnail": "https://picsum.photos/seed/earbuds/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/earbuds1/800/800" },
+      { "url": "https://picsum.photos/seed/earbuds2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_19a", "title": "Black", "sku": "EB-BLK-01", "prices": [{ "amount": 49900, "currency_code": "ILS" }], "inventory_quantity": 22 },
+      { "id": "var_19b", "title": "White", "sku": "EB-WHT-01", "prices": [{ "amount": 49900, "currency_code": "ILS" }], "inventory_quantity": 18 }
+    ],
+    "options": [
+      { "id": "opt_color_19", "title": "Color", "values": ["Black", "White"] }
+    ],
+    "tags": [{ "value": "electronics" }, { "value": "audio" }],
+    "collection": { "id": "col_01", "title": "Audio", "handle": "audio" },
+    "created_at": "2026-05-10T10:00:00Z"
+  },
+  {
+    "id": "prod_20",
+    "title": "Linen Bedding Set",
+    "handle": "linen-bedding-set",
+    "description": "Stonewashed pure linen bedding set including duvet cover and two pillowcases. Breathable, hypoallergenic, and softer with every wash.",
+    "thumbnail": "https://picsum.photos/seed/bedding/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/bedding1/800/800" },
+      { "url": "https://picsum.photos/seed/bedding2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_20a", "title": "Queen - Oatmeal", "sku": "BD-Q-OAT", "prices": [{ "amount": 59900, "currency_code": "ILS" }], "inventory_quantity": 10 },
+      { "id": "var_20b", "title": "Queen - Slate", "sku": "BD-Q-SLT", "prices": [{ "amount": 59900, "currency_code": "ILS" }], "inventory_quantity": 7 },
+      { "id": "var_20c", "title": "King - Oatmeal", "sku": "BD-K-OAT", "prices": [{ "amount": 69900, "currency_code": "ILS" }], "inventory_quantity": 4 }
+    ],
+    "options": [
+      { "id": "opt_size_20", "title": "Size", "values": ["Queen", "King"] },
+      { "id": "opt_color_20", "title": "Color", "values": ["Oatmeal", "Slate"] }
+    ],
+    "tags": [{ "value": "home" }, { "value": "textiles" }],
+    "collection": { "id": "col_05", "title": "Home", "handle": "home" },
+    "created_at": "2026-05-15T10:00:00Z"
+  },
+  {
+    "id": "prod_21",
+    "title": "Insulated Travel Mug",
+    "handle": "insulated-travel-mug",
+    "description": "Double-walled vacuum-insulated travel mug with leak-proof lid. Keeps coffee hot for 6 hours and fits most car cup holders.",
+    "thumbnail": "https://picsum.photos/seed/mug/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/mug1/800/800" },
+      { "url": "https://picsum.photos/seed/mug2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_21a", "title": "Matte Black", "sku": "MG-BLK-01", "prices": [{ "amount": 11900, "currency_code": "ILS" }], "inventory_quantity": 48 },
+      { "id": "var_21b", "title": "Sage", "sku": "MG-SGE-01", "prices": [{ "amount": 11900, "currency_code": "ILS" }], "inventory_quantity": 26 }
+    ],
+    "options": [
+      { "id": "opt_color_21", "title": "Color", "values": ["Matte Black", "Sage"] }
+    ],
+    "tags": [{ "value": "kitchen" }, { "value": "accessories" }],
+    "collection": { "id": "col_03", "title": "Lifestyle", "handle": "lifestyle" },
+    "created_at": "2026-05-20T10:00:00Z"
+  },
+  {
+    "id": "prod_22",
+    "title": "Adjustable Dumbbell Pair",
+    "handle": "adjustable-dumbbell-pair",
+    "description": "Pair of adjustable dumbbells ranging from 2.5kg to 24kg each with a quick-dial weight selector. Replaces 15 sets of weights.",
+    "thumbnail": "https://picsum.photos/seed/dumbbell/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/dumbbell1/800/800" },
+      { "url": "https://picsum.photos/seed/dumbbell2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_22a", "title": "Standard", "sku": "DB-STD-01", "prices": [{ "amount": 129900, "currency_code": "ILS" }], "inventory_quantity": 6 }
+    ],
+    "options": [
+      { "id": "opt_type_22", "title": "Type", "values": ["Standard"] }
+    ],
+    "tags": [{ "value": "fitness" }, { "value": "equipment" }],
+    "collection": { "id": "col_04", "title": "Health", "handle": "health" },
+    "created_at": "2026-05-25T10:00:00Z"
+  },
+  {
+    "id": "prod_23",
+    "title": "Leather Card Wallet",
+    "handle": "leather-card-wallet",
+    "description": "Slim full-grain leather card wallet with RFID-blocking lining and space for six cards plus folded cash. Ages beautifully over time.",
+    "thumbnail": "https://picsum.photos/seed/wallet/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/wallet1/800/800" },
+      { "url": "https://picsum.photos/seed/wallet2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_23a", "title": "Brown", "sku": "WL-BRN-01", "prices": [{ "amount": 16900, "currency_code": "ILS" }], "inventory_quantity": 34 },
+      { "id": "var_23b", "title": "Black", "sku": "WL-BLK-01", "prices": [{ "amount": 16900, "currency_code": "ILS" }], "inventory_quantity": 29 }
+    ],
+    "options": [
+      { "id": "opt_color_23", "title": "Color", "values": ["Brown", "Black"] }
+    ],
+    "tags": [{ "value": "accessories" }, { "value": "leather" }],
+    "collection": { "id": "col_03", "title": "Lifestyle", "handle": "lifestyle" },
+    "created_at": "2026-06-01T10:00:00Z"
+  },
+  {
+    "id": "prod_24",
+    "title": "4K Action Camera",
+    "handle": "4k-action-camera",
+    "description": "Waterproof 4K action camera with electronic image stabilization, 170-degree wide lens, and dual color displays. Includes mounting kit.",
+    "thumbnail": "https://picsum.photos/seed/actioncam/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/actioncam1/800/800" },
+      { "url": "https://picsum.photos/seed/actioncam2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_24a", "title": "Standard Kit", "sku": "AC-STD-01", "prices": [{ "amount": 79900, "currency_code": "ILS" }], "inventory_quantity": 9 },
+      { "id": "var_24b", "title": "Bundle Kit", "sku": "AC-BND-01", "prices": [{ "amount": 99900, "currency_code": "ILS" }], "inventory_quantity": 4 }
+    ],
+    "options": [
+      { "id": "opt_kit_24", "title": "Kit", "values": ["Standard Kit", "Bundle Kit"] }
+    ],
+    "tags": [{ "value": "electronics" }, { "value": "photography" }],
+    "collection": { "id": "col_01", "title": "Audio", "handle": "audio" },
+    "created_at": "2026-06-05T10:00:00Z"
+  },
+  {
+    "id": "prod_25",
+    "title": "Aromatherapy Diffuser",
+    "handle": "aromatherapy-diffuser",
+    "description": "Ultrasonic essential oil diffuser with 300ml capacity, 7-color ambient light, and auto shut-off. Runs quietly for up to 10 hours.",
+    "thumbnail": "https://picsum.photos/seed/diffuser/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/diffuser1/800/800" },
+      { "url": "https://picsum.photos/seed/diffuser2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_25a", "title": "Light Wood", "sku": "DF-LWD-01", "prices": [{ "amount": 18900, "currency_code": "ILS" }], "inventory_quantity": 21 },
+      { "id": "var_25b", "title": "Dark Wood", "sku": "DF-DWD-01", "prices": [{ "amount": 18900, "currency_code": "ILS" }], "inventory_quantity": 13 }
+    ],
+    "options": [
+      { "id": "opt_finish_25", "title": "Finish", "values": ["Light Wood", "Dark Wood"] }
+    ],
+    "tags": [{ "value": "home" }, { "value": "wellness" }],
+    "collection": { "id": "col_05", "title": "Home", "handle": "home" },
+    "created_at": "2026-06-10T10:00:00Z"
+  },
+  {
+    "id": "prod_26",
+    "title": "Foldable Laptop Stand",
+    "handle": "foldable-laptop-stand",
+    "description": "Aluminum foldable laptop stand with six adjustable height levels and a ventilated design for better cooling. Fits laptops up to 17 inches.",
+    "thumbnail": "https://picsum.photos/seed/laptopstand/400/400",
+    "images": [
+      { "url": "https://picsum.photos/seed/laptopstand1/800/800" },
+      { "url": "https://picsum.photos/seed/laptopstand2/800/800" }
+    ],
+    "variants": [
+      { "id": "var_26a", "title": "Silver", "sku": "LS-SLV-01", "prices": [{ "amount": 21900, "currency_code": "ILS" }], "inventory_quantity": 24 },
+      { "id": "var_26b", "title": "Space Gray", "sku": "LS-GRY-01", "prices": [{ "amount": 21900, "currency_code": "ILS" }], "inventory_quantity": 17 }
+    ],
+    "options": [
+      { "id": "opt_color_26", "title": "Color", "values": ["Silver", "Space Gray"] }
+    ],
+    "tags": [{ "value": "office" }, { "value": "accessories" }],
+    "collection": { "id": "col_02", "title": "Office", "handle": "office" },
+    "created_at": "2026-06-15T10:00:00Z"
+  }
+]
