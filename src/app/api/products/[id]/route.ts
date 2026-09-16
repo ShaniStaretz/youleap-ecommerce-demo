@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import productsData from "../../../../../mock-data/products.json"
+import { getProductById } from "@/services/products"
 import {
   HTTP_NOT_FOUND,
   PRODUCT_DETAIL_DELAY_BASE_MS,
@@ -20,7 +20,7 @@ export async function GET(
     )
   )
 
-  const product = productsData.find((p) => p.id === id)
+  const product = getProductById(id)
 
   if (!product) {
     return NextResponse.json(

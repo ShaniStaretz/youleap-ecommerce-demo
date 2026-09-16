@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import productsData from "../../../../mock-data/products.json"
+import { listProducts } from "@/services/products"
 import {
   DEFAULT_LIMIT,
   DEFAULT_OFFSET,
@@ -36,30 +36,7 @@ export async function GET(request: NextRequest) {
     )
   )
 
-  let filtered = [...productsData]
-
-  if (query) {
-    filtered = filtered.filter(
-      (p) =>
-        p.title.toLowerCase().includes(query) ||
-        p.description.toLowerCase().includes(query)
-    )
-  }
-
-  if (collection) {
-    filtered = filtered.filter(
-      (p) => p.collection.handle.toLowerCase() === collection
-    )
-  }
-
-  if (tag) {
-    filtered = filtered.filter((p) =>
-      p.tags.some((t) => t.value.toLowerCase() === tag)
-    )
-  }
-
-  const count = filtered.length
-  const products = filtered.slice(offset, offset + limit)
-
-  return NextResponse.json({ products, count, limit, offset })
+  return NextResponse.json(
+    listProducts({ limit, offset, query, collection, tag })
+  )
 }
