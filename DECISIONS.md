@@ -21,6 +21,8 @@
 - No database or external commerce backend was added because the task supplies local mock data and does not require a real backend.
 - Kept aggregation work on the server because production-sized datasets may require long-running SQL queries. The product list should fetch only a bounded page, while a dedicated aggregation query should return counts instead of transferring every matching product to the browser.
 - For a real SQL-backed implementation, filter and join columns should be indexed, aggregation queries should select only required fields, and query plans should be reviewed with `EXPLAIN`. Requests should also use database timeouts, cancellation, and observability rather than allowing unbounded work to block application resources.
+- Updated `openapi.json` to keep the public API contract aligned with the implementation. It documents the paginated product endpoint, the single-product endpoint, and the server-side `/api/products/filters` aggregation endpoint.
+- The OpenAPI document now declares the pagination constraints (`limit` from 1 to 100 and non-negative `offset`), the bounded search input, aggregation response schemas, and structured 400 error responses. This gives frontend consumers and API tooling an explicit contract instead of relying only on route implementation details.
 
 ### Pricing and Variant Data
 
@@ -48,7 +50,13 @@
 - The `/product/[id]` route is the canonical refreshable product URL, but it reuses the grid and modal UI so users do not have two competing product-detail experiences.
 - Product detail and Quick View share option-value derivation, price formatting, image galleries, variant selection, and stock-status behavior.
 - Cart state is provided at the app layout boundary so it survives navigation between the grid and canonical product paths. Quick View adds the selected variant, price, title, and inventory limit to the cart; the cart drawer owns quantities, removal, totals, and checkout.
+- The cart action uses a persistent sticky header with store identity and a `View cart` label, keeping it discoverable at the top without overlapping the products page filter controls.
+- Adding an item opens the cart drawer but keeps checkout collapsed. The customer must explicitly click `Checkout` before shipping fields are rendered, avoiding an unexpected form transition after adding a product.
+- After a successful Add to Cart action, Quick View closes immediately and the cart drawer remains visible, keeping the selected item available without stacking two overlays.
+- The cart action uses a persistent ecommerce-style header with store identity on the left and `View cart` on the right. This keeps the cart discoverable without overlapping or hiding the products page's `Show filters` control.
 - Checkout is intentionally client-only because the README requires confirmation without a real backend. Shipping fields are validated with the existing `zod` dependency, and successful submission clears the cart while showing a confirmation message.
+- Checkout validation is field-level: each invalid input receives a red border, `aria-invalid`, an associated error message, and the first invalid field receives focus. This keeps feedback next to the input that needs correction instead of above the submit button.
+- Checkout inputs include example placeholders that match their validation guidance, helping users understand the expected name, address, city, and postal-code formats before submitting.
 - Search, collection, tag, and pagination offset are kept in local React state. They are still serialized into request query parameters, so the values are visible in browser DevTools without changing the page URL. This keeps the page URL clean, at the cost of losing filter state on refresh and browser navigation.
 - Search and filter requests are debounced and stale requests are aborted so rapid input changes do not overwrite newer results.
 - API responses are checked for non-2xx status codes before being cast to success types. Product and filter metadata requests have separate error states so a metadata failure does not prevent products from rendering.
@@ -70,12 +78,12 @@
 - Product search and filter changes now send the README-documented `q`, `collection`, and `tag` parameters after local validation and a short debounce. The filter choices are derived from the initial product response, and checkbox groups allow one active collection and one active tag because that is the API contract. This is a client-side input guard, not a replacement for server-side validation.
 - Keeping filter state local avoids changing the page URL and keeps the interaction lightweight, but filtered views are not shareable or restorable after a refresh. The request query string remains explicit for API observability and debugging.
 - Product results use a 12-item page size and the API's `offset` value. Loading more appends the next page, while changing search or filters resets the offset and replaces the result list.
-- The products-per-page selector is URL-backed and supports `5`, `10`, the existing default `12`, and `20`. Changing the limit resets the offset, and Load More advances by the selected limit.
+- The products-per-page selector is local state and supports `5`, `10`, the existing default `12`, and `20`. The selected limit is serialized only into API requests, not the page URL. Changing the limit resets the offset, and Load More advances by the selected limit.
 - Filter counts and available collection/tag options are refreshed from a dedicated server-side metadata request whenever the first page or active filters change, so the sidebar reflects the current filtered result set instead of only the first visible page.
 - Aggregations are calculated through `GET /api/products/filters`; the browser receives only counts and option values instead of requesting up to 1,000 products and calculating them locally.
 - On smaller screens, collection and tag options are ranked by frequency, with the three most common shown initially and a per-group `Load more <count>` control for the remaining options. Desktop keeps the complete filter list visible.
 - The products layout uses responsive spacing and grid breakpoints, a mobile-stacked filter panel, a desktop-sticky sidebar, fluid card images, and minimum-width constraints to prevent overflow on narrow screens. The desktop sidebar column is only created while filters are open so the grid uses the full width otherwise.
-- With more time, I would add automated route/service tests, richer request error handling, and a shared client-side cart model.
+- With more time, I would add automated route/service and component tests and persistence for the client cart.
 
 ## Verification
 
@@ -87,19 +95,20 @@
   - Mixed-case collection and tag filters return matching products.
   - Combined `q`, `collection`, and `tag` filters return the expected filtered results.
   - `limit=12&offset=0` and `limit=12&offset=12` return separate product pages with the expected count and offsets.
-  - Production build passes with the URL search-parameter Suspense boundary.
+  - Production build passes for the shared product and Quick View routes.
   - Product card pricing now handles empty catalog data safely and uses currency-aware formatting.
   - Quick View adds selected in-stock variants to the global cart, supports removal and quantity limits, and validates shipping details before showing checkout confirmation.
+  - Adding to cart opens the cart drawer with checkout collapsed; clicking `Checkout` explicitly reveals the shipping form.
   - Product lookup returns the expected product.
   - Missing product lookup returns HTTP 404.
 - The products page and product card were checked at responsive breakpoints through responsive grid, spacing, sticky-sidebar, fluid-image, and overflow-safe classes.
 - The canonical `/product/:id` route was production-built and verified to render the shared grid/Quick View route instead of the removed standalone detail component.
 - Editor diagnostics reported no errors in the changed files.
-- Targeted `pnpm lint` passes for the products page and product card, with one remaining warning for the existing raw `<img>` element.
+- Full `pnpm lint` passes without errors or warnings after replacing raw catalog images with `next/image`.
 
 ## Surprises
 
-- The starter frontend is intentionally minimal compared with the breadth of the README requirements: it currently renders a product grid but does not yet implement the quick-view modal, cart, or checkout workflow.
+- The starter frontend was intentionally minimal compared with the breadth of the README requirements, so Quick View, cart, and checkout required a client-side interaction layer.
 - The repository is configured with pnpm `10.28.2` through the `packageManager` field, which makes the package-manager version explicit for clean clones.
 - The API initially accepted negative pagination values and used case-sensitive collection and tag filters, so those edge cases were hardened while preserving the documented response contract.
 - Search validation required balancing usability with input safety, so the allowlist supports common product-search punctuation while rejecting control characters and unexpected symbols before a request is sent.
