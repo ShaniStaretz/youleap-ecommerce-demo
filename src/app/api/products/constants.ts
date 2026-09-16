@@ -1,5 +1,7 @@
 export const DEFAULT_LIMIT = 12
 export const DEFAULT_OFFSET = 0
+export const MAX_LIMIT = 100
+export const MAX_QUERY_LENGTH = 100
 
 export const PRODUCTS_LIST_DELAY_BASE_MS = 200
 export const PRODUCTS_LIST_DELAY_RANGE_MS = 300
