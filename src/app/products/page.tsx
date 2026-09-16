@@ -6,6 +6,7 @@ import {
   useState,
 } from "react"
 import ProductCard from "@/components/ProductCard"
+import QuickViewModal from "@/components/QuickViewModal"
 import type { Product, ProductsResponse } from "@/types/product"
 
 const SEARCH_PATTERN = /^[\p{L}\p{N}\s'.,:&()+\-/_]{0,100}$/u
@@ -45,6 +46,9 @@ async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
 export default function ProductsPage() {
   const requestSequence = useRef(0)
   const [products, setProducts] = useState<Product[] | null>(null)
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
+  const [quickViewId, setQuickViewId] = useState<string | null>(null)
+  const [quickViewError, setQuickViewError] = useState("")
   const [searchInput, setSearchInput] = useState("")
   const [search, setSearch] = useState("")
   const [collection, setCollection] = useState("")
@@ -61,6 +65,56 @@ export default function ProductsPage() {
   const [tagsExpanded, setTagsExpanded] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [searchError, setSearchError] = useState("")
+
+  useEffect(() => {
+    function syncQuickViewFromUrl() {
+      const productPath = window.location.pathname.match(/^\/product\/([^/]+)$/)
+      setQuickViewId(productPath ? decodeURIComponent(productPath[1]) : null)
+    }
+
+    syncQuickViewFromUrl()
+    window.addEventListener("popstate", syncQuickViewFromUrl)
+    return () => window.removeEventListener("popstate", syncQuickViewFromUrl)
+  }, [])
+
+  useEffect(() => {
+    if (!quickViewId) {
+      setQuickViewProduct(null)
+      setQuickViewError("")
+      return
+    }
+
+    const loadedProduct = products?.find((product) => product.id === quickViewId)
+    if (loadedProduct) {
+      setQuickViewProduct(loadedProduct)
+      setQuickViewError("")
+      return
+    }
+
+    if (!products) {
+      return
+    }
+
+    const controller = new AbortController()
+    setQuickViewProduct(null)
+    setQuickViewError("")
+
+    fetchJson<{ product: Product }>(
+      `/api/products/${encodeURIComponent(quickViewId)}`,
+      controller.signal
+    )
+      .then(({ product }) => setQuickViewProduct(product))
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return
+        }
+        setQuickViewError(
+          error instanceof Error ? error.message : "Unable to load quick view."
+        )
+      })
+
+    return () => controller.abort()
+  }, [products, quickViewId])
 
   useEffect(() => {
     setSearchInput(search)
@@ -217,6 +271,20 @@ export default function ProductsPage() {
     setSearch(value.trim())
   }
 
+  function openQuickView(product: Product) {
+    window.history.pushState({}, "", `/product/${encodeURIComponent(product.id)}`)
+    setQuickViewId(product.id)
+    setQuickViewProduct(product)
+    setQuickViewError("")
+  }
+
+  function closeQuickView() {
+    window.history.pushState({}, "", "/products")
+    setQuickViewId(null)
+    setQuickViewProduct(null)
+    setQuickViewError("")
+  }
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-5 sm:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -368,7 +436,11 @@ export default function ProductsPage() {
           )}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
             {products?.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                onQuickView={openQuickView}
+              />
             ))}
           </div>
           {hasMoreProducts && (
@@ -383,6 +455,17 @@ export default function ProductsPage() {
           )}
         </section>
       </div>
+      {quickViewProduct && (
+        <QuickViewModal
+          product={quickViewProduct}
+          onClose={closeQuickView}
+        />
+      )}
+      {quickViewError && (
+        <p role="alert" className="mt-6 text-sm text-red-700">
+          {quickViewError}
+        </p>
+      )}
     </main>
   )
 }

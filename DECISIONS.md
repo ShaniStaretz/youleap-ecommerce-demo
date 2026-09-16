@@ -39,6 +39,14 @@
 ### State Management and Libraries
 
 - The products page uses React `useState` and `useEffect` to manage search text, filter selections, filter options, and product results while fetching from `/api/products`.
+- Quick View receives the complete `Product` object already loaded for the grid, avoiding a duplicate product request when opening the modal. It is the primary product-detail experience and includes the image gallery, options, price, stock status, and add-to-cart action.
+- Quick View uses the canonical product resource path, for example `/product/prod_01`, rather than a separate `quickView` query parameter. The `/product/[id]` route renders the same products grid with that Quick View open, so refreshing or directly visiting the path restores the modal experience.
+- Refresh behavior is implemented by reusing `ProductsPage` from `/product/[id]`; the page reads the current pathname, restores the product ID, and opens `QuickViewModal`. This avoids maintaining a second product-detail presentation and keeps the refreshed experience identical to opening Quick View from the grid.
+- The grid passes its selected `Product` directly to `QuickViewModal` through the `onQuickView` callback. This keeps opening the modal immediate and avoids requesting data that the grid already has.
+- The URL stores only the product identity in the same path used by `GET /api/products/:id`, rather than the full product object. On refresh, `/product/prod_01` calls `GET /api/products/prod_01`, keeping the public resource URL consistent with the API route.
+- Closing the modal returns to `/products`, and browser back/forward events synchronize the modal through the `popstate` listener.
+- The `/product/[id]` route is the canonical refreshable product URL, but it reuses the grid and modal UI so users do not have two competing product-detail experiences.
+- Product detail and Quick View share option-value derivation, price formatting, image galleries, variant selection, and stock-status behavior.
 - Search, collection, tag, and pagination offset are kept in local React state. They are still serialized into request query parameters, so the values are visible in browser DevTools without changing the page URL. This keeps the page URL clean, at the cost of losing filter state on refresh and browser navigation.
 - Search and filter requests are debounced and stale requests are aborted so rapid input changes do not overwrite newer results.
 - API responses are checked for non-2xx status codes before being cast to success types. Product and filter metadata requests have separate error states so a metadata failure does not prevent products from rendering.
@@ -55,7 +63,7 @@
 - Currency formatting and catalog normalization are kept in reusable domain helpers so price and variant rules do not leak into presentation components.
 - Simulated delays remain in the route handlers to preserve the starter behavior. A production API would rely on real backend latency and would likely add request tracing and structured error responses.
 - Pagination validation is intentionally limited to the documented numeric parameters. The API does not impose a maximum page size because the README does not specify one.
-- The frontend now supports the product grid, live search, and collection/tag filters. Quick view, cart, and checkout still require implementation to satisfy the full product brief.
+- The frontend now supports the product grid, live search, collection/tag filters, and refresh-safe Quick View. Cart and checkout still require implementation to satisfy the full product brief.
 - Product search and filter changes now send the README-documented `q`, `collection`, and `tag` parameters after local validation and a short debounce. The filter choices are derived from the initial product response, and checkbox groups allow one active collection and one active tag because that is the API contract. This is a client-side input guard, not a replacement for server-side validation.
 - Keeping filter state local avoids changing the page URL and keeps the interaction lightweight, but filtered views are not shareable or restorable after a refresh. The request query string remains explicit for API observability and debugging.
 - Product results use a 12-item page size and the API's `offset` value. Loading more appends the next page, while changing search or filters resets the offset and replaces the result list.
@@ -81,6 +89,7 @@
   - Product lookup returns the expected product.
   - Missing product lookup returns HTTP 404.
 - The products page and product card were checked at responsive breakpoints through responsive grid, spacing, sticky-sidebar, fluid-image, and overflow-safe classes.
+- The canonical `/product/:id` route was production-built and verified to render the shared grid/Quick View route instead of the removed standalone detail component.
 - Editor diagnostics reported no errors in the changed files.
 - Targeted `pnpm lint` passes for the products page and product card, with one remaining warning for the existing raw `<img>` element.
 

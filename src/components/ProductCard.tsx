@@ -3,7 +3,15 @@
 import type { Product } from "@/types/product"
 import { formatPrice, getStartingPrice } from "@/lib/pricing"
 
-export default function ProductCard({ product }: { product: Product }) {
+type ProductCardProps = {
+  product: Product
+  onQuickView: (product: Product) => void
+}
+
+export default function ProductCard({
+  product,
+  onQuickView,
+}: ProductCardProps) {
   return (
     <div className="min-w-0 overflow-hidden rounded-lg border bg-white shadow-sm">
       <img
@@ -19,7 +27,8 @@ export default function ProductCard({ product }: { product: Product }) {
           {formatPrice(getStartingPrice(product))}
         </p>
         <button
-          onClick={() => {}}
+          type="button"
+          onClick={() => onQuickView(product)}
           className="mt-3 w-full rounded-md bg-black py-2 text-white text-sm hover:bg-gray-800 transition-colors"
         >
           Quick View

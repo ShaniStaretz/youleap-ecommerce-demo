@@ -1,5 +1,6 @@
 import productsData from "../../mock-data/products.json"
-import type { CatalogProduct, VariantOptionValues } from "@/types/catalog"
+import { toCatalogProduct } from "@/lib/catalog"
+import type { CatalogProduct } from "@/types/catalog"
 import type { Product, ProductsResponse } from "@/types/product"
 
 type ProductListFilters = {
@@ -107,35 +108,11 @@ export function getProductById(id: string): Product | undefined {
   return productsData.find((product) => product.id === id)
 }
 
-function getVariantOptionValues(
-  variantTitle: string,
-  options: Product["options"]
-): VariantOptionValues {
-  const normalizedTitle = variantTitle.toLowerCase()
-
-  return Object.fromEntries(
-    options
-      .map((option) => {
-        const value = option.values.find((optionValue) =>
-          normalizedTitle.includes(optionValue.toLowerCase())
-        )
-        return value ? [option.title, value] : null
-      })
-      .filter((entry): entry is [string, string] => entry !== null)
-  )
-}
-
 export function getCatalogProductById(id: string): CatalogProduct | undefined {
   const product = getProductById(id)
   if (!product) {
     return undefined
   }
 
-  return {
-    ...product,
-    variants: product.variants.map((variant) => ({
-      ...variant,
-      option_values: getVariantOptionValues(variant.title, product.options),
-    })),
-  }
+  return toCatalogProduct(product)
 }

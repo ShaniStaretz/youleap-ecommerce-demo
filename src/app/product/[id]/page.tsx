@@ -1,13 +1,11 @@
+import ProductsPage from "@/app/products/page"
+
 export default async function ProductPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id } = await params
+  await params
 
-  return (
-    <main>
-      <h1>Product {id}</h1>
-    </main>
-  )
+  return <ProductsPage />
 }
