@@ -1,16 +1,18 @@
 "use client"
 
-export default function ProductCard({ product, onQuickView }: any) {
+import type { Product } from "@/types/product"
+
+export default function ProductCard({ product }: { product: Product }) {
   return (
-    <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+    <div className="min-w-0 overflow-hidden rounded-lg border bg-white shadow-sm">
       <img
         src={product.thumbnail}
         width={400}
         height={400}
-        className="w-full h-64 object-cover"
+        className="aspect-square h-auto w-full object-cover"
       />
       <div className="p-4">
-        <h3 className="font-medium text-lg">{product.title}</h3>
+        <h3 className="break-words text-lg font-medium">{product.title}</h3>
         <p className="text-gray-600 mt-1">
           {(product.variants[0].prices[0].amount / 100).toFixed(2)}
         </p>
