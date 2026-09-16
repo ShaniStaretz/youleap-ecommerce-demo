@@ -7,21 +7,10 @@ import type { Product, ProductsResponse } from "@/types/product"
 const SEARCH_PATTERN = /^[\p{L}\p{N}\s'.,:&()+\-/_]{0,100}$/u
 const INITIAL_FILTER_OPTION_COUNT = 3
 const PRODUCTS_PAGE_SIZE = 12
-const FILTER_OPTIONS_LIMIT = 1000
 
 type FilterOption = {
   value: string
   count: number
-}
-
-function buildFilterOptions(values: string[]): FilterOption[] {
-  const counts = new Map<string, number>()
-  values.forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1))
-
-  return Array.from(counts, ([value, count]) => ({ value, count })).sort(
-    (first, second) =>
-      second.count - first.count || first.value.localeCompare(second.value)
-  )
 }
 
 export default function ProductsPage() {
@@ -62,9 +51,16 @@ export default function ProductsPage() {
     if (tag) {
       params.set("tag", tag)
     }
-    const metadataParams = new URLSearchParams(params)
-    metadataParams.set("limit", String(FILTER_OPTIONS_LIMIT))
-    metadataParams.set("offset", "0")
+    const filterParams = new URLSearchParams()
+    if (normalizedSearch) {
+      filterParams.set("q", normalizedSearch)
+    }
+    if (collection) {
+      filterParams.set("collection", collection)
+    }
+    if (tag) {
+      filterParams.set("tag", tag)
+    }
 
     const controller = new AbortController()
     setIsLoading(true)
@@ -74,9 +70,17 @@ export default function ProductsPage() {
       }).then((res) => res.json() as Promise<ProductsResponse>)
       const metadataRequest =
         offset === 0
-          ? fetch(`/api/products?${metadataParams}`, {
-              signal: controller.signal,
-            }).then((res) => res.json() as Promise<ProductsResponse>)
+          ? fetch(
+              `/api/products/filters${filterParams.size ? `?${filterParams}` : ""}`,
+              { signal: controller.signal }
+            ).then(
+              (res) =>
+                res.json() as Promise<{
+                  total: number
+                  collections: FilterOption[]
+                  tags: FilterOption[]
+                }>
+            )
           : Promise.resolve(null)
 
       Promise.all([pageRequest, metadataRequest])
@@ -88,18 +92,9 @@ export default function ProductsPage() {
           )
           setTotalProducts(data.count)
           if (metadata) {
-            setCollectionOptions(
-              buildFilterOptions(
-                metadata.products.map((product) => product.collection.handle)
-              )
-            )
-            setTagOptions(
-              buildFilterOptions(
-                metadata.products.flatMap((product) =>
-                  product.tags.map((productTag) => productTag.value)
-                )
-              )
-            )
+            setTotalProducts(metadata.total)
+            setCollectionOptions(metadata.collections)
+            setTagOptions(metadata.tags)
           }
         })
         .catch((error: unknown) => {

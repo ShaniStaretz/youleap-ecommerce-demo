@@ -17,6 +17,8 @@
   - `GET /api/products` returns `products`, `count`, `limit`, and `offset`.
   - `GET /api/products/:id` returns `{ product }`.
 - No database or external commerce backend was added because the task supplies local mock data and does not require a real backend.
+- Kept aggregation work on the server because production-sized datasets may require long-running SQL queries. The product list should fetch only a bounded page, while a dedicated aggregation query should return counts instead of transferring every matching product to the browser.
+- For a real SQL-backed implementation, filter and join columns should be indexed, aggregation queries should select only required fields, and query plans should be reviewed with `EXPLAIN`. Requests should also use database timeouts, cancellation, and observability rather than allowing unbounded work to block application resources.
 
 ### Validation and Constants
 
@@ -37,12 +39,15 @@
 ## Tradeoffs
 
 - Product data is read from a JSON file on every service call. This is appropriate for the supplied demo, but a production implementation would use a repository or Medusa client with caching and error handling.
+- Adding `GET /api/products/filters` is an intentional exception to the original README restriction against modifying `src/app/api/`, made to keep aggregation logic on the server as requested.
+- The server-side aggregation boundary follows the same long-query best practice: keep expensive database work close to the data, return a small result, use bounded pagination for product rows, and avoid issuing an unbounded `SELECT *` from the client.
 - Simulated delays remain in the route handlers to preserve the starter behavior. A production API would rely on real backend latency and would likely add request tracing and structured error responses.
 - Pagination validation is intentionally limited to the documented numeric parameters. The API does not impose a maximum page size because the README does not specify one.
 - The frontend now supports the product grid, live search, and collection/tag filters. Quick view, cart, and checkout still require implementation to satisfy the full product brief.
 - Product search and filter changes now send the README-documented `q`, `collection`, and `tag` parameters after local validation and a short debounce. The filter choices are derived from the initial product response, and checkbox groups allow one active collection and one active tag because that is the API contract. This is a client-side input guard, not a replacement for server-side validation.
 - Product results use a 12-item page size and the API's `offset` value. Loading more appends the next page, while changing search or filters resets the offset and replaces the result list.
-- Filter counts and available collection/tag options are refreshed from a full metadata request whenever the first page or active filters change, so the sidebar reflects the current filtered result set instead of only the first visible page.
+- Filter counts and available collection/tag options are refreshed from a dedicated server-side metadata request whenever the first page or active filters change, so the sidebar reflects the current filtered result set instead of only the first visible page.
+- Aggregations are calculated through `GET /api/products/filters`; the browser receives only counts and option values instead of requesting up to 1,000 products and calculating them locally.
 - On smaller screens, collection and tag options are ranked by frequency, with the three most common shown initially and a per-group `Load more <count>` control for the remaining options. Desktop keeps the complete filter list visible.
 - The products layout uses responsive spacing and grid breakpoints, a mobile-stacked filter panel, a desktop-sticky sidebar, fluid card images, and minimum-width constraints to prevent overflow on narrow screens. The desktop sidebar column is only created while filters are open so the grid uses the full width otherwise.
 - With more time, I would add automated route/service tests, richer request error handling, and a shared client-side cart model.
