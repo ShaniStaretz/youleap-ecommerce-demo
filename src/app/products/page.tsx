@@ -1,26 +1,60 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import ProductCard from "@/components/ProductCard"
 import type { Product, ProductsResponse } from "@/types/product"
 
 const SEARCH_PATTERN = /^[\p{L}\p{N}\s'.,:&()+\-/_]{0,100}$/u
 const INITIAL_FILTER_OPTION_COUNT = 3
-const PRODUCTS_PAGE_SIZE = 12
+const DEFAULT_PAGE_SIZE = 12
+const PAGE_SIZE_OPTIONS = [5, 10, DEFAULT_PAGE_SIZE, 20]
 
 type FilterOption = {
   value: string
   count: number
 }
 
+type FilterAggregationsResponse = {
+  total: number
+  collections: FilterOption[]
+  tags: FilterOption[]
+}
+
+async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
+  const response = await fetch(url, { signal })
+  const body = (await response.json().catch(() => null)) as
+    | { error?: string }
+    | T
+    | null
+
+  if (!response.ok) {
+    const message =
+      body && typeof body === "object" && "error" in body && body.error
+        ? body.error
+        : `Request failed with status ${response.status}`
+    throw new Error(message)
+  }
+
+  return body as T
+}
+
 export default function ProductsPage() {
+  const requestSequence = useRef(0)
   const [products, setProducts] = useState<Product[] | null>(null)
-  const [offset, setOffset] = useState(0)
-  const [totalProducts, setTotalProducts] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
+  const [searchInput, setSearchInput] = useState("")
   const [search, setSearch] = useState("")
   const [collection, setCollection] = useState("")
   const [tag, setTag] = useState("")
+  const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE)
+  const [offset, setOffset] = useState(0)
+  const [totalProducts, setTotalProducts] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [productError, setProductError] = useState("")
+  const [filterError, setFilterError] = useState("")
   const [collectionOptions, setCollectionOptions] = useState<FilterOption[]>([])
   const [tagOptions, setTagOptions] = useState<FilterOption[]>([])
   const [collectionsExpanded, setCollectionsExpanded] = useState(false)
@@ -29,18 +63,26 @@ export default function ProductsPage() {
   const [searchError, setSearchError] = useState("")
 
   useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
+  useEffect(() => {
     const normalizedSearch = search.trim()
+    const sequence = ++requestSequence.current
 
     if (!SEARCH_PATTERN.test(normalizedSearch)) {
       setSearchError(
         "Use up to 100 letters, numbers, spaces, or common punctuation."
       )
+      setProducts(null)
+      setProductError("")
+      setIsLoading(false)
       return
     }
 
     setSearchError("")
     const params = new URLSearchParams()
-    params.set("limit", String(PRODUCTS_PAGE_SIZE))
+    params.set("limit", String(limit))
     params.set("offset", String(offset))
     if (normalizedSearch) {
       params.set("q", normalizedSearch)
@@ -64,53 +106,81 @@ export default function ProductsPage() {
 
     const controller = new AbortController()
     setIsLoading(true)
+    setProductError("")
+    if (offset === 0) {
+      setFilterError("")
+    }
     const timeout = setTimeout(() => {
-      const pageRequest = fetch(`/api/products?${params}`, {
-        signal: controller.signal,
-      }).then((res) => res.json() as Promise<ProductsResponse>)
-      const metadataRequest =
-        offset === 0
-          ? fetch(
-              `/api/products/filters${filterParams.size ? `?${filterParams}` : ""}`,
-              { signal: controller.signal }
-            ).then(
-              (res) =>
-                res.json() as Promise<{
-                  total: number
-                  collections: FilterOption[]
-                  tags: FilterOption[]
-                }>
-            )
-          : Promise.resolve(null)
+      fetchJson<ProductsResponse>(`/api/products?${params}`, controller.signal)
+        .then((data) => {
+          if (sequence !== requestSequence.current) {
+            return
+          }
 
-      Promise.all([pageRequest, metadataRequest])
-        .then(([data, metadata]) => {
           setProducts((currentProducts) =>
             offset === 0
               ? data.products
               : [...(currentProducts ?? []), ...data.products]
           )
           setTotalProducts(data.count)
-          if (metadata) {
-            setTotalProducts(metadata.total)
-            setCollectionOptions(metadata.collections)
-            setTagOptions(metadata.tags)
-          }
         })
         .catch((error: unknown) => {
-          if (error instanceof DOMException && error.name === "AbortError") {
+          if (
+            error instanceof DOMException &&
+            error.name === "AbortError"
+          ) {
             return
           }
-          throw error
+          if (sequence === requestSequence.current) {
+            setProductError(
+              error instanceof Error
+                ? error.message
+                : "Unable to load products."
+            )
+          }
         })
-        .finally(() => setIsLoading(false))
+        .finally(() => {
+          if (sequence === requestSequence.current) {
+            setIsLoading(false)
+          }
+        })
+
+      if (offset === 0) {
+        fetchJson<FilterAggregationsResponse>(
+          `/api/products/filters${filterParams.size ? `?${filterParams}` : ""}`,
+          controller.signal
+        )
+          .then((data) => {
+            if (sequence !== requestSequence.current) {
+              return
+            }
+            setTotalProducts(data.total)
+            setCollectionOptions(data.collections)
+            setTagOptions(data.tags)
+          })
+          .catch((error: unknown) => {
+            if (
+              error instanceof DOMException &&
+              error.name === "AbortError"
+            ) {
+              return
+            }
+            if (sequence === requestSequence.current) {
+              setFilterError(
+                error instanceof Error
+                  ? error.message
+                  : "Unable to load filters."
+              )
+            }
+          })
+      }
     }, 300)
 
     return () => {
       clearTimeout(timeout)
       controller.abort()
     }
-  }, [collection, offset, search, tag])
+  }, [collection, limit, offset, search, tag])
 
   const hasMoreProducts = (products?.length ?? 0) < totalProducts
 
@@ -126,9 +196,25 @@ export default function ProductsPage() {
     setTag((currentTag) => (currentTag === value ? "" : value))
   }
 
+  function handleLimitChange(value: string) {
+    const nextLimit = Number(value)
+    if (PAGE_SIZE_OPTIONS.includes(nextLimit)) {
+      setOffset(0)
+      setLimit(nextLimit)
+    }
+  }
+
   function handleSearchChange(value: string) {
+    setSearchInput(value)
+    if (!SEARCH_PATTERN.test(value.trim())) {
+      setSearchError(
+        "Use up to 100 letters, numbers, spaces, or common punctuation."
+      )
+      return
+    }
+    setSearchError("")
     setOffset(0)
-    setSearch(value)
+    setSearch(value.trim())
   }
 
   return (
@@ -163,7 +249,10 @@ export default function ProductsPage() {
                 <input
                   type="checkbox"
                   checked={!collection}
-                  onChange={() => setCollection("")}
+                  onChange={() => {
+                    setOffset(0)
+                    setCollection("")
+                  }}
                 />
                 All collections
               </label>
@@ -200,7 +289,10 @@ export default function ProductsPage() {
                 <input
                   type="checkbox"
                   checked={!tag}
-                  onChange={() => setTag("")}
+                  onChange={() => {
+                    setOffset(0)
+                    setTag("")
+                  }}
                 />
                 All tags
               </label>
@@ -239,15 +331,39 @@ export default function ProductsPage() {
           </label>
           <input
             id="product-search"
-            value={search}
+            value={searchInput}
             onChange={(event) => handleSearchChange(event.target.value)}
             placeholder="Search products"
             maxLength={100}
             className="mb-6 w-full rounded-md border px-3 py-2"
           />
+          <label className="mb-6 flex items-center gap-2 text-sm">
+            <span>Products per page</span>
+            <select
+              value={limit}
+              onChange={(event) => handleLimitChange(event.target.value)}
+              className="rounded-md border px-2 py-1"
+            >
+              {PAGE_SIZE_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
           {searchError && (
             <p role="alert" className="mb-6 text-sm text-red-600">
               {searchError}
+            </p>
+          )}
+          {productError && (
+            <p role="alert" className="mb-6 text-sm text-red-600">
+              {productError}
+            </p>
+          )}
+          {filterError && (
+            <p role="status" className="mb-6 text-sm text-amber-700">
+              Filters are unavailable: {filterError}
             </p>
           )}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -258,7 +374,7 @@ export default function ProductsPage() {
           {hasMoreProducts && (
             <button
               type="button"
-              onClick={() => setOffset((currentOffset) => currentOffset + PRODUCTS_PAGE_SIZE)}
+              onClick={() => setOffset((currentOffset) => currentOffset + limit)}
               disabled={isLoading}
               className="mx-auto mt-8 block rounded-md border px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
             >
