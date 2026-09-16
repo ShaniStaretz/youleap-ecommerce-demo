@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import type { Product, ProductVariant } from "@/types/product"
 import { formatPrice } from "@/lib/pricing"
 import { getVariantOptionValues } from "@/lib/catalog"
+import { useCart } from "@/components/CartProvider"
 
 type QuickViewModalProps = {
   product: Product
@@ -19,6 +20,7 @@ export default function QuickViewModal({
   )
   const [activeImage, setActiveImage] = useState(product.thumbnail)
   const [addedToCart, setAddedToCart] = useState(false)
+  const { addToCart } = useCart()
 
   useEffect(() => {
     const firstVariant = product.variants[0]
@@ -157,7 +159,23 @@ export default function QuickViewModal({
             <button
               type="button"
               disabled={!isInStock}
-              onClick={() => setAddedToCart(true)}
+              onClick={() => {
+                if (!variant) {
+                  return
+                }
+                const price = variant.prices[0]
+                if (!price) {
+                  return
+                }
+                addToCart({
+                  productId: product.id,
+                  productTitle: product.title,
+                  variantTitle: variant.title,
+                  price,
+                  inventoryQuantity: variant.inventory_quantity,
+                })
+                setAddedToCart(true)
+              }}
               className="mt-5 w-full rounded-md bg-black px-4 py-3 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {addedToCart ? "Added to cart" : "Add to Cart"}
