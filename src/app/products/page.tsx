@@ -43,11 +43,17 @@ async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
   return body as T
 }
 
-export default function ProductsPage() {
+export default function ProductsPage({
+  initialQuickViewId,
+}: {
+  initialQuickViewId?: string
+}) {
   const requestSequence = useRef(0)
   const [products, setProducts] = useState<Product[] | null>(null)
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
-  const [quickViewId, setQuickViewId] = useState<string | null>(null)
+  const [quickViewId, setQuickViewId] = useState<string | null>(
+    initialQuickViewId ?? null
+  )
   const [quickViewError, setQuickViewError] = useState("")
   const [searchInput, setSearchInput] = useState("")
   const [search, setSearch] = useState("")
@@ -75,7 +81,7 @@ export default function ProductsPage() {
     syncQuickViewFromUrl()
     window.addEventListener("popstate", syncQuickViewFromUrl)
     return () => window.removeEventListener("popstate", syncQuickViewFromUrl)
-  }, [])
+  }, [initialQuickViewId])
 
   useEffect(() => {
     if (!quickViewId) {
@@ -279,7 +285,7 @@ export default function ProductsPage() {
   }
 
   function closeQuickView() {
-    window.history.pushState({}, "", "/products")
+    window.history.replaceState({}, "", "/products")
     setQuickViewId(null)
     setQuickViewProduct(null)
     setQuickViewError("")

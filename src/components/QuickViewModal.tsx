@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import Image from "next/image"
 import type { Product, ProductVariant } from "@/types/product"
-import { formatPrice } from "@/lib/pricing"
+import { formatPrice, getVariantPrice } from "@/lib/pricing"
 import { getVariantOptionValues } from "@/lib/catalog"
 import { useCart } from "@/components/CartProvider"
 
@@ -20,6 +21,8 @@ export default function QuickViewModal({
   )
   const [activeImage, setActiveImage] = useState(product.thumbnail)
   const [addedToCart, setAddedToCart] = useState(false)
+  const dialogRef = useRef<HTMLElement>(null)
+  const previouslyFocused = useRef<HTMLElement | null>(null)
   const { addToCart } = useCart()
 
   useEffect(() => {
@@ -34,14 +37,41 @@ export default function QuickViewModal({
   }, [product])
 
   useEffect(() => {
+    previouslyFocused.current = document.activeElement as HTMLElement | null
+    dialogRef.current?.focus()
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         onClose()
+        return
+      }
+      if (event.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          "button, select, input, a[href]"
+        )
+        if (focusable.length === 0) {
+          return
+        }
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault()
+          last.focus()
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault()
+          first.focus()
+        }
       }
     }
 
     document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = previousOverflow
+      previouslyFocused.current?.focus()
+    }
   }, [onClose])
 
   const selectedVariant: ProductVariant | undefined = product.variants.find(
@@ -55,7 +85,7 @@ export default function QuickViewModal({
       )
     }
   )
-  const variant = selectedVariant ?? product.variants[0]
+  const variant = selectedVariant
   const isInStock = Boolean(variant && variant.inventory_quantity > 0)
   const images = product.images.length > 0
     ? product.images.map((image) => image.url)
@@ -75,6 +105,8 @@ export default function QuickViewModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="quick-view-title"
+        tabIndex={-1}
+        ref={dialogRef}
         className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-5 shadow-xl sm:p-7"
       >
         <div className="mb-5 flex items-start justify-between gap-4">
@@ -93,9 +125,11 @@ export default function QuickViewModal({
 
         <div className="grid gap-7 md:grid-cols-2">
           <div>
-            <img
+            <Image
               src={activeImage}
               alt={product.title}
+              width={800}
+              height={800}
               className="aspect-square w-full rounded-md object-cover"
             />
             <div className="mt-3 grid grid-cols-4 gap-2">
@@ -107,9 +141,11 @@ export default function QuickViewModal({
                   className="overflow-hidden rounded-md border"
                   aria-label={`View ${product.title} image`}
                 >
-                  <img
+                  <Image
                     src={image}
                     alt=""
+                    width={200}
+                    height={200}
                     className="aspect-square w-full object-cover"
                   />
                 </button>
@@ -146,7 +182,7 @@ export default function QuickViewModal({
             </div>
 
             <p className="mt-6 text-2xl font-semibold">
-              {formatPrice(variant?.prices[0])}
+              {formatPrice(variant ? getVariantPrice(variant) : undefined)}
             </p>
             <p className={isInStock ? "text-green-700" : "text-red-700"}>
               {variant
@@ -163,18 +199,19 @@ export default function QuickViewModal({
                 if (!variant) {
                   return
                 }
-                const price = variant.prices[0]
+                const price = getVariantPrice(variant)
                 if (!price) {
                   return
                 }
                 addToCart({
                   productId: product.id,
+                  variantId: variant.id,
                   productTitle: product.title,
                   variantTitle: variant.title,
                   price,
                   inventoryQuantity: variant.inventory_quantity,
                 })
-                setAddedToCart(true)
+                onClose()
               }}
               className="mt-5 w-full rounded-md bg-black px-4 py-3 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >

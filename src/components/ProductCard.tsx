@@ -1,6 +1,7 @@
 "use client"
 
 import type { Product } from "@/types/product"
+import Image from "next/image"
 import { formatPrice, getStartingPrice } from "@/lib/pricing"
 
 type ProductCardProps = {
@@ -14,7 +15,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <div className="min-w-0 overflow-hidden rounded-lg border bg-white shadow-sm">
-      <img
+      <Image
         src={product.thumbnail}
         width={400}
         height={400}

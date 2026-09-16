@@ -14,6 +14,12 @@ export function getStartingPrice(product: Product): Price | undefined {
     )
 }
 
+export function getVariantPrice(variant: Product["variants"][number]): Price | undefined {
+  return variant.prices.find(
+    (price) => Number.isFinite(price.amount) && /^[A-Z]{3}$/i.test(price.currency_code)
+  )
+}
+
 export function formatPrice(price: Price | undefined): string {
   if (!price || !Number.isFinite(price.amount)) {
     return "Price unavailable"
