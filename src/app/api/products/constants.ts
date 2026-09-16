@@ -1,0 +1,10 @@
+export const DEFAULT_LIMIT = 12
+export const DEFAULT_OFFSET = 0
+
+export const PRODUCTS_LIST_DELAY_BASE_MS = 200
+export const PRODUCTS_LIST_DELAY_RANGE_MS = 300
+export const PRODUCT_DETAIL_DELAY_BASE_MS = 150
+export const PRODUCT_DETAIL_DELAY_RANGE_MS = 200
+
+export const HTTP_BAD_REQUEST = 400
+export const HTTP_NOT_FOUND = 404
