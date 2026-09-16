@@ -7,10 +7,21 @@ import type { Product, ProductsResponse } from "@/types/product"
 const SEARCH_PATTERN = /^[\p{L}\p{N}\s'.,:&()+\-/_]{0,100}$/u
 const INITIAL_FILTER_OPTION_COUNT = 3
 const PRODUCTS_PAGE_SIZE = 12
+const FILTER_OPTIONS_LIMIT = 1000
 
 type FilterOption = {
   value: string
   count: number
+}
+
+function buildFilterOptions(values: string[]): FilterOption[] {
+  const counts = new Map<string, number>()
+  values.forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1))
+
+  return Array.from(counts, ([value, count]) => ({ value, count })).sort(
+    (first, second) =>
+      second.count - first.count || first.value.localeCompare(second.value)
+  )
 }
 
 export default function ProductsPage() {
@@ -51,55 +62,45 @@ export default function ProductsPage() {
     if (tag) {
       params.set("tag", tag)
     }
+    const metadataParams = new URLSearchParams(params)
+    metadataParams.set("limit", String(FILTER_OPTIONS_LIMIT))
+    metadataParams.set("offset", "0")
 
     const controller = new AbortController()
     setIsLoading(true)
     const timeout = setTimeout(() => {
-      fetch(`/api/products${params.size ? `?${params}` : ""}`, {
+      const pageRequest = fetch(`/api/products?${params}`, {
         signal: controller.signal,
-      })
-        .then((res) => res.json() as Promise<ProductsResponse>)
-        .then((data) => {
+      }).then((res) => res.json() as Promise<ProductsResponse>)
+      const metadataRequest =
+        offset === 0
+          ? fetch(`/api/products?${metadataParams}`, {
+              signal: controller.signal,
+            }).then((res) => res.json() as Promise<ProductsResponse>)
+          : Promise.resolve(null)
+
+      Promise.all([pageRequest, metadataRequest])
+        .then(([data, metadata]) => {
           setProducts((currentProducts) =>
             offset === 0
               ? data.products
               : [...(currentProducts ?? []), ...data.products]
           )
           setTotalProducts(data.count)
-          setCollectionOptions((currentOptions) => {
-            if (currentOptions.length > 0) {
-              return currentOptions
-            }
-
-            const counts = new Map<string, number>()
-            data.products.forEach((product) => {
-              const value = product.collection.handle
-              counts.set(value, (counts.get(value) ?? 0) + 1)
-            })
-
-            return Array.from(counts, ([value, count]) => ({ value, count })).sort(
-              (first, second) =>
-                second.count - first.count || first.value.localeCompare(second.value)
+          if (metadata) {
+            setCollectionOptions(
+              buildFilterOptions(
+                metadata.products.map((product) => product.collection.handle)
+              )
             )
-          })
-          setTagOptions((currentOptions) => {
-            if (currentOptions.length > 0) {
-              return currentOptions
-            }
-
-            const counts = new Map<string, number>()
-            data.products.forEach((product) => {
-              product.tags.forEach((productTag) => {
-                const value = productTag.value
-                counts.set(value, (counts.get(value) ?? 0) + 1)
-              })
-            })
-
-            return Array.from(counts, ([value, count]) => ({ value, count })).sort(
-              (first, second) =>
-                second.count - first.count || first.value.localeCompare(second.value)
+            setTagOptions(
+              buildFilterOptions(
+                metadata.products.flatMap((product) =>
+                  product.tags.map((productTag) => productTag.value)
+                )
+              )
             )
-          })
+          }
         })
         .catch((error: unknown) => {
           if (error instanceof DOMException && error.name === "AbortError") {
