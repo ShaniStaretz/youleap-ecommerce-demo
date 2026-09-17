@@ -30,6 +30,7 @@
 - Cart items use the exact `variantId`.
 - Quick View matches the selected option combination to one exact variant and displays its title, SKU, price, stock, and cart identity.
 - Fully out-of-stock products are hidden from the grid.
+- The sidebar provides `Clear all` for search and filter state, and the search input provides an accessible `×` clear button.
 
 ### Validation and Accessibility
 

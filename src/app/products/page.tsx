@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { X } from "lucide-react"
 import ProductCard from "@/components/ProductCard"
 import QuickViewModal from "@/components/QuickViewModal"
 import { hasAvailableVariant } from "@/lib/catalog"
@@ -269,6 +270,15 @@ export default function ProductsPage({
     setSearch(value.trim())
   }
 
+  function clearAllFilters() {
+    setSearchInput("")
+    setSearchError("")
+    setSearch("")
+    setCollection("")
+    setTag("")
+    setOffset(0)
+  }
+
   function openQuickView(product: Product) {
     window.history.pushState({}, "", `/product/${encodeURIComponent(product.id)}`)
     setQuickViewId(product.id)
@@ -308,7 +318,16 @@ export default function ProductsPage({
             id="product-filters"
             className="rounded-lg border p-4 lg:sticky lg:top-6 lg:self-start"
           >
-            <h2 className="mb-4 font-semibold">Filters</h2>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="font-semibold">Filters</h2>
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="text-sm font-medium underline"
+              >
+                Clear all
+              </button>
+            </div>
             <fieldset className="mb-6">
               <legend className="mb-2 text-sm font-medium">Collection</legend>
               <label className="mb-2 flex items-center gap-2 text-sm">
@@ -395,14 +414,26 @@ export default function ProductsPage({
           <label htmlFor="product-search" className="sr-only">
             Search products
           </label>
-          <input
-            id="product-search"
-            value={searchInput}
-            onChange={(event) => handleSearchChange(event.target.value)}
-            placeholder="Search products"
-            maxLength={100}
-            className="mb-6 w-full rounded-md border px-3 py-2"
-          />
+          <div className="relative mb-6">
+            <input
+              id="product-search"
+              value={searchInput}
+              onChange={(event) => handleSearchChange(event.target.value)}
+              placeholder="Search products"
+              maxLength={100}
+              className="w-full rounded-md border px-3 py-2 pr-10"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => handleSearchChange("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            )}
+          </div>
           <label className="mb-6 flex items-center gap-2 text-sm">
             <span>Products per page</span>
             <select
