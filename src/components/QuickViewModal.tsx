@@ -23,7 +23,7 @@ export default function QuickViewModal({
   const [addedToCart, setAddedToCart] = useState(false)
   const dialogRef = useRef<HTMLElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
-  const { addToCart } = useCart()
+  const { addToCart, getAvailableStock } = useCart()
 
   useEffect(() => {
     const firstVariant = product.variants[0]
@@ -86,7 +86,10 @@ export default function QuickViewModal({
     }
   )
   const variant = selectedVariant
-  const isInStock = Boolean(variant && variant.inventory_quantity > 0)
+  const availableStock = variant
+    ? getAvailableStock(variant.id, variant.inventory_quantity)
+    : 0
+  const isInStock = availableStock > 0
   const images = product.images.length > 0
     ? product.images.map((image) => image.url)
     : [product.thumbnail]
@@ -187,7 +190,7 @@ export default function QuickViewModal({
             <p className={isInStock ? "text-green-700" : "text-red-700"}>
               {variant
                 ? isInStock
-                  ? `${variant.inventory_quantity} in stock`
+                  ? `${availableStock} in stock`
                   : "Out of stock"
                 : "Variant unavailable"}
             </p>
@@ -203,7 +206,7 @@ export default function QuickViewModal({
                 if (!price) {
                   return
                 }
-                addToCart({
+                const added = addToCart({
                   productId: product.id,
                   variantId: variant.id,
                   productTitle: product.title,
@@ -211,7 +214,9 @@ export default function QuickViewModal({
                   price,
                   inventoryQuantity: variant.inventory_quantity,
                 })
-                onClose()
+                if (added) {
+                  onClose()
+                }
               }}
               className="mt-5 w-full rounded-md bg-black px-4 py-3 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >

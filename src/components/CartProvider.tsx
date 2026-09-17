@@ -1,6 +1,13 @@
 "use client"
 
-import { createContext, useContext, useMemo, useState } from "react"
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { z } from "zod"
 import { ShoppingCart } from "lucide-react"
 import Link from "next/link"
@@ -24,7 +31,8 @@ type CartContextValue = {
   items: CartItem[]
   itemCount: number
   total: number
-  addToCart: (item: AddToCartInput) => void
+  addToCart: (item: AddToCartInput) => boolean
+  getAvailableStock: (variantId: string, fallback: number) => number
   removeFromCart: (id: string) => void
   setQuantity: (id: string, quantity: number) => void
 }
@@ -55,9 +63,64 @@ export default function CartProvider({ children }: { children: React.ReactNode }
   const [items, setItems] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+  const [cartMessage, setCartMessage] = useState("")
   const [checkoutMessage, setCheckoutMessage] = useState("")
   const [checkoutErrors, setCheckoutErrors] = useState<Partial<Record<CheckoutField, string>>>({})
   const [currencyError, setCurrencyError] = useState("")
+  const [stockByVariant, setStockByVariant] = useState<Record<string, number>>({})
+  const cartDialogRef = useRef<HTMLElement>(null)
+  const cartTriggerRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!cartMessage) {
+      return
+    }
+    const timeout = setTimeout(() => setCartMessage(""), 4000)
+    return () => clearTimeout(timeout)
+  }, [cartMessage])
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    cartDialogRef.current?.focus()
+    const trigger = cartTriggerRef.current
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false)
+        return
+      }
+      if (event.key !== "Tab" || !cartDialogRef.current) {
+        return
+      }
+      const focusable = cartDialogRef.current.querySelectorAll<HTMLElement>(
+        "button, input, a[href]"
+      )
+      if (focusable.length === 0) {
+        return
+      }
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = previousOverflow
+      trigger?.focus()
+    }
+  }, [isOpen])
 
   const cart = useMemo<CartContextValue>(() => {
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
@@ -73,14 +136,26 @@ export default function CartProvider({ children }: { children: React.ReactNode }
         const cartCurrency = currentCurrency(items)
         if (cartCurrency && cartCurrency !== input.price.currency_code) {
           setCurrencyError("Items in one cart must use the same currency.")
-          return
+          return false
+        }
+        const availableStock = stockByVariant[input.variantId] ?? input.inventoryQuantity
+        const existing = items.find((item) => item.variantId === input.variantId)
+        if (availableStock <= (existing?.quantity ?? 0)) {
+          setCurrencyError(`${input.variantTitle} has no more stock available.`)
+          return false
+        }
+        if (stockByVariant[input.variantId] === undefined) {
+          setStockByVariant((current) => ({
+            ...current,
+            [input.variantId]: input.inventoryQuantity,
+          }))
         }
         setItems((current) => {
-          const existing = current.find((item) => item.id === input.variantId)
-          if (existing) {
+          const currentItem = current.find((item) => item.id === input.variantId)
+          if (currentItem) {
             return current.map((item) =>
-              item.id === existing.id
-                ? { ...item, quantity: Math.min(item.quantity + 1, item.inventoryQuantity) }
+              item.id === currentItem.id
+                ? { ...item, quantity: item.quantity + 1 }
                 : item
             )
           }
@@ -97,8 +172,10 @@ export default function CartProvider({ children }: { children: React.ReactNode }
         setCheckoutErrors({})
         setCurrencyError("")
         setIsCheckoutOpen(false)
-        setIsOpen(true)
+        setCartMessage(`${input.variantTitle} was added to your cart.`)
+        return true
       },
+      getAvailableStock: (variantId, fallback) => stockByVariant[variantId] ?? fallback,
       removeFromCart: (id) => setItems((current) => current.filter((item) => item.id !== id)),
       setQuantity: (id, quantity) =>
         setItems((current) =>
@@ -107,14 +184,14 @@ export default function CartProvider({ children }: { children: React.ReactNode }
               ? {
                   ...item,
                   quantity: Number.isFinite(quantity)
-                    ? Math.max(1, Math.min(Math.floor(quantity), item.inventoryQuantity))
+                    ? Math.max(1, Math.min(Math.floor(quantity), stockByVariant[item.variantId] ?? item.inventoryQuantity))
                     : item.quantity,
                 }
               : item
           )
         ),
     }
-  }, [items])
+  }, [items, stockByVariant])
 
   function handleCheckout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -139,6 +216,24 @@ export default function CartProvider({ children }: { children: React.ReactNode }
       }
       return
     }
+    const stockError = items.find((item) =>
+      item.quantity > (stockByVariant[item.variantId] ?? item.inventoryQuantity)
+    )
+    if (stockError) {
+      setCurrencyError(
+        `${stockError.variantTitle} does not have enough stock for this order.`
+      )
+      return
+    }
+    setStockByVariant((current) => {
+      const next = { ...current }
+      items.forEach((item) => {
+        next[item.variantId] =
+          (next[item.variantId] ?? item.inventoryQuantity) - item.quantity
+      })
+      return next
+    })
+    setCurrencyError("")
     setCheckoutErrors({})
     setCheckoutMessage("Order confirmed. Thank you for your purchase!")
     setItems([])
@@ -156,6 +251,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
           type="button"
           aria-label={`View cart with ${cart.itemCount} items`}
           aria-expanded={isOpen}
+          ref={cartTriggerRef}
           onClick={() => setIsOpen((open) => !open)}
           className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm"
         >
@@ -163,17 +259,43 @@ export default function CartProvider({ children }: { children: React.ReactNode }
           View cart ({cart.itemCount})
         </button>
         </div>
+        {cartMessage && (
+          <p role="status" className="mx-auto mt-2 w-full max-w-7xl text-right text-sm text-green-700">
+            {cartMessage}
+          </p>
+        )}
+        {currencyError && (
+          <p role="alert" className="mx-auto mt-2 w-full max-w-7xl text-right text-sm text-red-700">
+            {currencyError}
+          </p>
+        )}
       </header>
       {children}
       {isOpen && (
-        <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto border-l bg-white p-5 shadow-2xl">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <h2 className="text-xl font-bold">Your cart</h2>
-            <button type="button" onClick={() => setIsOpen(false)} className="rounded-md border px-3 py-1" aria-label="Close cart">
-              ×
-            </button>
-          </div>
-          {cart.items.length === 0 ? (
+        <div
+          role="presentation"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsOpen(false)
+            }
+          }}
+        >
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cart-title"
+            ref={cartDialogRef}
+            tabIndex={-1}
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-5 shadow-2xl sm:p-7"
+          >
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <h2 id="cart-title" className="text-xl font-bold">Your cart</h2>
+              <button type="button" onClick={() => setIsOpen(false)} className="rounded-md border px-3 py-1" aria-label="Close cart">
+                ×
+              </button>
+            </div>
+            {cart.items.length === 0 ? (
             <>
               {checkoutMessage ? (
                 <p role="status" className="text-sm text-green-700">
@@ -183,14 +305,20 @@ export default function CartProvider({ children }: { children: React.ReactNode }
                 <p className="text-gray-600">Your cart is empty.</p>
               )}
             </>
-          ) : (
+            ) : (
             <>
               <ul className="space-y-4">
                 {cart.items.map((item) => (
                   <li key={item.id} className="border-b pb-4">
                     <div className="flex justify-between gap-3">
                       <div>
-                        <p className="font-medium">{item.productTitle}</p>
+                        <Link
+                          href={`/product/${encodeURIComponent(item.productId)}`}
+                          onClick={() => setIsOpen(false)}
+                          className="font-medium underline"
+                        >
+                          {item.productTitle}
+                        </Link>
                         <p className="text-sm text-gray-600">{item.variantTitle}</p>
                         <p className="text-sm">{formatPrice(item.price)}</p>
                       </div>
@@ -271,8 +399,9 @@ export default function CartProvider({ children }: { children: React.ReactNode }
               </form>
               )}
             </>
-          )}
-        </aside>
+            )}
+          </aside>
+        </div>
       )}
     </CartContext.Provider>
   )
