@@ -11,6 +11,7 @@ import {
 import { z } from "zod"
 import { ShoppingCart } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { formatPrice } from "@/lib/pricing"
 import type { Price } from "@/types/product"
 import { useDialogFocus } from "@/hooks/useDialogFocus"
@@ -72,6 +73,7 @@ export function useCart() {
 }
 
 export default function CartProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
   const [items, setItems] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
@@ -138,7 +140,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
   }, [cartMessage])
 
   function closeCart() {
-    window.history.replaceState({}, "", "/products")
+    router.replace("/products")
     setIsOpen(false)
   }
 
