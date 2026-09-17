@@ -52,6 +52,7 @@
 - Cart and Quick View share `useDialogFocus`, a generic accessibility hook that centralizes focus capture/restoration, keyboard trapping, Escape dismissal, and body-scroll locking.
 - Quick View image galleries support accessible centered previous/next arrow controls. The previous arrow hides on the first image and the next arrow hides on the last image, while thumbnail selection remains synchronized with the active image.
 - Cart state is provided at the app layout boundary so it survives navigation between the grid and canonical product paths. Quick View adds the selected variant, price, title, and inventory limit to the cart; the cart drawer owns quantities, removal, totals, and checkout.
+- Cart failures share one `cartError` state for currency, stock, and checkout conflicts. The same message is rendered in the header, cart modal, and Quick View so failed actions remain visible in context.
 - A client-session stock ledger tracks remaining quantity by `variantId`. Add-to-cart, quantity changes, and checkout all validate against that ledger; successful checkout decrements it, so an order cannot exceed the stock observed during the session.
 - The product grid filters out products whose variants are all out of stock; products remain visible when at least one variant can still be purchased.
 - When stock is insufficient, the cart displays an accessible alert and Quick View remains open so the customer can choose another variant or quantity.
@@ -64,6 +65,7 @@
 - The cart action uses a persistent ecommerce-style header with store identity on the left and `View cart` on the right. This keeps the cart discoverable without overlapping or hiding the products page's `Show filters` control.
 - Checkout is intentionally client-only because the README requires confirmation without a real backend. Shipping fields are validated with the existing `zod` dependency, and successful submission clears the cart while showing a confirmation message.
 - Checkout validation is field-level: each invalid input receives a red border, `aria-invalid`, an associated error message, and the first invalid field receives focus. This keeps feedback next to the input that needs correction instead of above the submit button.
+- Successful checkout closes the checkout form and clears the cart; reopening the cart clears the previous confirmation so stale order messages do not leak into a new session.
 - Checkout inputs include example placeholders that match their validation guidance, helping users understand the expected name, address, city, and postal-code formats before submitting.
 - Search, collection, tag, and pagination offset are kept in local React state. They are still serialized into request query parameters, so the values are visible in browser DevTools without changing the page URL. This keeps the page URL clean, at the cost of losing filter state on refresh and browser navigation.
 - Search and filter requests are debounced and stale requests are aborted so rapid input changes do not overwrite newer results.
@@ -103,7 +105,7 @@
   - Production build passes for the shared product and Quick View routes.
   - Product card pricing now handles empty catalog data safely and uses currency-aware formatting.
   - Quick View adds selected in-stock variants to the global cart, supports removal and quantity limits, and validates shipping details before showing checkout confirmation.
-  - Adding to cart opens the cart drawer with checkout collapsed; clicking `Checkout` explicitly reveals the shipping form.
+  - Adding to cart leaves the cart modal closed with checkout collapsed; clicking `View cart` and then `Checkout` explicitly reveals the shipping form.
   - Product lookup returns the expected product.
   - Missing product lookup returns HTTP 404.
 - The products page and product card were checked at responsive breakpoints through responsive grid, spacing, sticky-sidebar, fluid-image, and overflow-safe classes.

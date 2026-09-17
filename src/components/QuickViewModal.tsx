@@ -23,7 +23,7 @@ export default function QuickViewModal({
   )
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [addedToCart, setAddedToCart] = useState(false)
-  const { addToCart, getAvailableStock } = useCart()
+  const { addToCart, cartError, getAvailableStock } = useCart()
   const dialogRef = useDialogFocus(true, onClose)
 
   useEffect(() => {
@@ -191,6 +191,11 @@ export default function QuickViewModal({
                   : "Out of stock"
                 : "Variant unavailable"}
             </p>
+            {cartError && (
+              <p role="alert" className="mt-3 text-sm text-red-700">
+                {cartError}
+              </p>
+            )}
 
             <button
               type="button"

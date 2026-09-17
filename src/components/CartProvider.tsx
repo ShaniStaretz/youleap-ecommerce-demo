@@ -31,6 +31,7 @@ type CartContextValue = {
   items: CartItem[]
   itemCount: number
   total: number
+  cartError: string
   addToCart: (item: AddToCartInput) => boolean
   getAvailableStock: (variantId: string, fallback: number) => number
   removeFromCart: (id: string) => void
@@ -66,7 +67,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
   const [cartMessage, setCartMessage] = useState("")
   const [checkoutMessage, setCheckoutMessage] = useState("")
   const [checkoutErrors, setCheckoutErrors] = useState<Partial<Record<CheckoutField, string>>>({})
-  const [currencyError, setCurrencyError] = useState("")
+  const [cartError, setCartError] = useState("")
   const [stockByVariant, setStockByVariant] = useState<Record<string, number>>({})
 
   useEffect(() => {
@@ -89,16 +90,17 @@ export default function CartProvider({ children }: { children: React.ReactNode }
       items,
       itemCount,
       total,
+      cartError,
       addToCart: (input) => {
         const cartCurrency = currentCurrency(items)
         if (cartCurrency && cartCurrency !== input.price.currency_code) {
-          setCurrencyError("Items in one cart must use the same currency.")
+          setCartError("Items in one cart must use the same currency.")
           return false
         }
         const availableStock = stockByVariant[input.variantId] ?? input.inventoryQuantity
         const existing = items.find((item) => item.variantId === input.variantId)
         if (availableStock <= (existing?.quantity ?? 0)) {
-          setCurrencyError(`${input.variantTitle} has no more stock available.`)
+          setCartError(`${input.variantTitle} has no more stock available.`)
           return false
         }
         if (stockByVariant[input.variantId] === undefined) {
@@ -127,7 +129,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
         })
         setCheckoutMessage("")
         setCheckoutErrors({})
-        setCurrencyError("")
+        setCartError("")
         setIsCheckoutOpen(false)
         setCartMessage(`${input.variantTitle} was added to your cart.`)
         return true
@@ -148,7 +150,16 @@ export default function CartProvider({ children }: { children: React.ReactNode }
           )
         ),
     }
-  }, [items, stockByVariant])
+  }, [cartError, items, stockByVariant])
+
+  function toggleCart() {
+    if (isOpen) {
+      setIsOpen(false)
+      return
+    }
+    setCheckoutMessage("")
+    setIsOpen(true)
+  }
 
   function handleCheckout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -177,7 +188,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
       item.quantity > (stockByVariant[item.variantId] ?? item.inventoryQuantity)
     )
     if (stockError) {
-      setCurrencyError(
+      setCartError(
         `${stockError.variantTitle} does not have enough stock for this order.`
       )
       return
@@ -190,9 +201,10 @@ export default function CartProvider({ children }: { children: React.ReactNode }
       })
       return next
     })
-    setCurrencyError("")
+    setCartError("")
     setCheckoutErrors({})
     setCheckoutMessage("Order confirmed. Thank you for your purchase!")
+    setIsCheckoutOpen(false)
     setItems([])
     event.currentTarget.reset()
   }
@@ -208,7 +220,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
           type="button"
           aria-label={`View cart with ${cart.itemCount} items`}
           aria-expanded={isOpen}
-          onClick={() => setIsOpen((open) => !open)}
+          onClick={toggleCart}
           className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm"
         >
           <ShoppingCart size={18} aria-hidden="true" />
@@ -220,9 +232,9 @@ export default function CartProvider({ children }: { children: React.ReactNode }
             {cartMessage}
           </p>
         )}
-        {currencyError && (
+        {cartError && (
           <p role="alert" className="mx-auto mt-2 w-full max-w-7xl text-right text-sm text-red-700">
-            {currencyError}
+            {cartError}
           </p>
         )}
       </header>
@@ -296,7 +308,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
                   </li>
                 ))}
               </ul>
-              {currencyError && <p role="alert" className="mt-4 text-sm text-red-700">{currencyError}</p>}
+              {cartError && <p role="alert" className="mt-4 text-sm text-red-700">{cartError}</p>}
               <p className="mt-6 text-right text-lg font-bold">Total: {formatPrice({ amount: cart.total, currency_code: cart.items[0].price.currency_code })}</p>
               {!isCheckoutOpen ? (
                 <button
