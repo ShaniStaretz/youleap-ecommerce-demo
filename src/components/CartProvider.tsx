@@ -5,7 +5,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react"
 import { z } from "zod"
@@ -13,6 +12,7 @@ import { ShoppingCart } from "lucide-react"
 import Link from "next/link"
 import { formatPrice } from "@/lib/pricing"
 import type { Price } from "@/types/product"
+import { useDialogFocus } from "@/hooks/useDialogFocus"
 
 type CartItem = {
   id: string
@@ -68,8 +68,6 @@ export default function CartProvider({ children }: { children: React.ReactNode }
   const [checkoutErrors, setCheckoutErrors] = useState<Partial<Record<CheckoutField, string>>>({})
   const [currencyError, setCurrencyError] = useState("")
   const [stockByVariant, setStockByVariant] = useState<Record<string, number>>({})
-  const cartDialogRef = useRef<HTMLElement>(null)
-  const cartTriggerRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!cartMessage) {
@@ -79,48 +77,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
     return () => clearTimeout(timeout)
   }, [cartMessage])
 
-  useEffect(() => {
-    if (!isOpen) {
-      return
-    }
-
-    cartDialogRef.current?.focus()
-    const trigger = cartTriggerRef.current
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsOpen(false)
-        return
-      }
-      if (event.key !== "Tab" || !cartDialogRef.current) {
-        return
-      }
-      const focusable = cartDialogRef.current.querySelectorAll<HTMLElement>(
-        "button, input, a[href]"
-      )
-      if (focusable.length === 0) {
-        return
-      }
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown)
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown)
-      document.body.style.overflow = previousOverflow
-      trigger?.focus()
-    }
-  }, [isOpen])
+  const cartDialogRef = useDialogFocus(isOpen, () => setIsOpen(false))
 
   const cart = useMemo<CartContextValue>(() => {
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
@@ -251,7 +208,6 @@ export default function CartProvider({ children }: { children: React.ReactNode }
           type="button"
           aria-label={`View cart with ${cart.itemCount} items`}
           aria-expanded={isOpen}
-          ref={cartTriggerRef}
           onClick={() => setIsOpen((open) => !open)}
           className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm"
         >

@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import type { Product, ProductVariant } from "@/types/product"
 import { formatPrice, getVariantPrice } from "@/lib/pricing"
 import { getVariantOptionValues } from "@/lib/catalog"
 import { useCart } from "@/components/CartProvider"
+import { useDialogFocus } from "@/hooks/useDialogFocus"
 
 type QuickViewModalProps = {
   product: Product
@@ -21,9 +22,8 @@ export default function QuickViewModal({
   )
   const [activeImage, setActiveImage] = useState(product.thumbnail)
   const [addedToCart, setAddedToCart] = useState(false)
-  const dialogRef = useRef<HTMLElement>(null)
-  const previouslyFocused = useRef<HTMLElement | null>(null)
   const { addToCart, getAvailableStock } = useCart()
+  const dialogRef = useDialogFocus(true, onClose)
 
   useEffect(() => {
     const firstVariant = product.variants[0]
@@ -35,44 +35,6 @@ export default function QuickViewModal({
     setActiveImage(product.thumbnail)
     setAddedToCart(false)
   }, [product])
-
-  useEffect(() => {
-    previouslyFocused.current = document.activeElement as HTMLElement | null
-    dialogRef.current?.focus()
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        onClose()
-        return
-      }
-      if (event.key === "Tab" && dialogRef.current) {
-        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-          "button, select, input, a[href]"
-        )
-        if (focusable.length === 0) {
-          return
-        }
-        const first = focusable[0]
-        const last = focusable[focusable.length - 1]
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault()
-          last.focus()
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault()
-          first.focus()
-        }
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown)
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown)
-      document.body.style.overflow = previousOverflow
-      previouslyFocused.current?.focus()
-    }
-  }, [onClose])
 
   const selectedVariant: ProductVariant | undefined = product.variants.find(
     (variant) => {

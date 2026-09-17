@@ -48,6 +48,7 @@
 - Closing the modal returns to `/products`, and browser back/forward events synchronize the modal through the `popstate` listener.
 - The `/product/[id]` route is the canonical refreshable product URL, but it reuses the grid and modal UI so users do not have two competing product-detail experiences.
 - Product detail and Quick View share option-value derivation, price formatting, image galleries, variant selection, and stock-status behavior.
+- Cart and Quick View share `useDialogFocus`, a generic accessibility hook that centralizes focus capture/restoration, keyboard trapping, Escape dismissal, and body-scroll locking.
 - Cart state is provided at the app layout boundary so it survives navigation between the grid and canonical product paths. Quick View adds the selected variant, price, title, and inventory limit to the cart; the cart drawer owns quantities, removal, totals, and checkout.
 - A client-session stock ledger tracks remaining quantity by `variantId`. Add-to-cart, quantity changes, and checkout all validate against that ledger; successful checkout decrements it, so an order cannot exceed the stock observed during the session.
 - The product grid filters out products whose variants are all out of stock; products remain visible when at least one variant can still be purchased.
