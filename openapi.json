@@ -21,13 +21,13 @@
           {
             "name": "limit",
             "in": "query",
-            "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 12 },
+            "schema": { "type": "integer", "default": 12 },
             "description": "Items per page"
           },
           {
             "name": "offset",
             "in": "query",
-            "schema": { "type": "integer", "minimum": 0, "default": 0 },
+            "schema": { "type": "integer", "default": 0 },
             "description": "Pagination offset"
           },
           {
@@ -55,56 +55,6 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ProductsResponse" }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid pagination or search parameters",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/products/filters": {
-      "get": {
-        "operationId": "getProductFilters",
-        "summary": "Get product filter aggregations",
-        "description": "Returns server-calculated product totals and collection/tag counts for the active filters.",
-        "parameters": [
-          {
-            "name": "q",
-            "in": "query",
-            "schema": { "type": "string", "maxLength": 100 }
-          },
-          {
-            "name": "collection",
-            "in": "query",
-            "schema": { "type": "string" }
-          },
-          {
-            "name": "tag",
-            "in": "query",
-            "schema": { "type": "string" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Filter aggregations",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ProductFilterAggregations" }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid search parameter",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
               }
             }
           }
@@ -241,30 +191,6 @@
         "required": ["product"],
         "properties": {
           "product": { "$ref": "#/components/schemas/Product" }
-        }
-      },
-      "FilterOption": {
-        "type": "object",
-        "required": ["value", "count"],
-        "properties": {
-          "value": { "type": "string" },
-          "count": { "type": "integer", "minimum": 0 }
-        }
-      },
-      "ProductFilterAggregations": {
-        "type": "object",
-        "required": ["total", "collections", "tags"],
-        "properties": {
-          "total": { "type": "integer", "minimum": 0 },
-          "collections": { "type": "array", "items": { "$ref": "#/components/schemas/FilterOption" } },
-          "tags": { "type": "array", "items": { "$ref": "#/components/schemas/FilterOption" } }
-        }
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "required": ["error"],
-        "properties": {
-          "error": { "type": "string" }
         }
       }
     }

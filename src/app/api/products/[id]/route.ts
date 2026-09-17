@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getProductById } from "@/services/products"
-import {
-  HTTP_NOT_FOUND,
-  PRODUCT_DETAIL_DELAY_BASE_MS,
-  PRODUCT_DETAIL_DELAY_RANGE_MS,
-} from "../constants"
+import productsData from "../../../../../mock-data/products.json"
 
 export async function GET(
   _request: NextRequest,
@@ -12,21 +7,12 @@ export async function GET(
 ) {
   const { id } = await params
 
-  await new Promise((r) =>
-    setTimeout(
-      r,
-      PRODUCT_DETAIL_DELAY_BASE_MS +
-        Math.random() * PRODUCT_DETAIL_DELAY_RANGE_MS
-    )
-  )
+  await new Promise((r) => setTimeout(r, 150 + Math.random() * 200))
 
-  const product = getProductById(id)
+  const product = productsData.find((p) => p.id === id)
 
   if (!product) {
-    return NextResponse.json(
-      { error: "Product not found" },
-      { status: HTTP_NOT_FOUND }
-    )
+    return NextResponse.json({ error: "Product not found" }, { status: 404 })
   }
 
   return NextResponse.json({ product })
