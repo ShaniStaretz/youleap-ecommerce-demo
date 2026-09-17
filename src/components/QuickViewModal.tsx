@@ -60,7 +60,7 @@ export default function QuickViewModal({
 
   function changeImage(direction: -1 | 1) {
     setActiveImageIndex((currentIndex) =>
-      (currentIndex + direction + images.length) % images.length
+      Math.max(0, Math.min(currentIndex + direction, images.length - 1))
     )
   }
 
@@ -108,22 +108,26 @@ export default function QuickViewModal({
               />
               {images.length > 1 && (
                 <>
-                  <button
-                    type="button"
-                    aria-label="Previous product image"
-                    onClick={() => changeImage(-1)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md"
-                  >
-                    <ChevronLeft size={20} aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Next product image"
-                    onClick={() => changeImage(1)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md"
-                  >
-                    <ChevronRight size={20} aria-hidden="true" />
-                  </button>
+                  {activeImageIndex > 0 && (
+                    <button
+                      type="button"
+                      aria-label="Previous product image"
+                      onClick={() => changeImage(-1)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md"
+                    >
+                      <ChevronLeft size={20} aria-hidden="true" />
+                    </button>
+                  )}
+                  {activeImageIndex < images.length - 1 && (
+                    <button
+                      type="button"
+                      aria-label="Next product image"
+                      onClick={() => changeImage(1)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md"
+                    >
+                      <ChevronRight size={20} aria-hidden="true" />
+                    </button>
+                  )}
                 </>
               )}
             </div>
