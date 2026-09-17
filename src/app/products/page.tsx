@@ -8,6 +8,7 @@ import {
 import ProductCard from "@/components/ProductCard"
 import QuickViewModal from "@/components/QuickViewModal"
 import { hasAvailableVariant } from "@/lib/catalog"
+import { HTTP_INTERNAL_SERVER_ERROR } from "@/lib/http"
 import type { Product, ProductsResponse } from "@/types/product"
 
 const SEARCH_PATTERN = /^[\p{L}\p{N}\s'.,:&()+\-/_]{0,100}$/u
@@ -54,7 +55,7 @@ async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
     | null
 
   if (!response.ok) {
-    if (response.status === 500) {
+    if (response.status === HTTP_INTERNAL_SERVER_ERROR) {
       throw new Error("The server is temporarily unavailable. Please try again.")
     }
     const message =
