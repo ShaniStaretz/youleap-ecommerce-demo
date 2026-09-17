@@ -51,6 +51,14 @@ A starter `ProductCard` component is provided in `src/components/`. Use it, modi
 
 ## API Documentation
 
+### API Change Notes
+
+- Existing endpoint: `GET /api/products` remains the product-list endpoint.
+- Existing endpoint: `GET /api/products/:id` remains the single-product endpoint.
+- No new REST endpoints were added.
+- Search and filter controls use the existing product-list query parameters.
+- Cart, checkout, stock tracking, and Quick View state are client-side; they do not add API routes.
+
 ### `GET /api/products`
 
 Returns a paginated list of products.
@@ -68,11 +76,13 @@ Returns a paginated list of products.
 ```json
 {
   "products": [Product],
-  "count": 12,
+   "count": 26,
   "limit": 12,
   "offset": 0
 }
 ```
+
+`count` is the number of products matching the active query and filters. The example value is based on the current mock catalog and may change with the data.
 
 ### `GET /api/products/:id`
 
@@ -84,6 +94,8 @@ Returns a single product.
   "product": Product
 }
 ```
+
+Returns HTTP `404` with `{ "error": "Product not found" }` when the product ID does not exist.
 
 ### Product Shape
 
