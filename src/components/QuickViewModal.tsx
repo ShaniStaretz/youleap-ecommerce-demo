@@ -5,7 +5,7 @@ import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { Product, ProductVariant } from "@/types/product"
 import { formatPrice, getVariantPrice } from "@/lib/pricing"
-import { getVariantOptionValues } from "@/lib/catalog"
+import { findVariantByOptions, getVariantOptionValues } from "@/lib/catalog"
 import { useCart } from "@/components/CartProvider"
 import { useDialogFocus } from "@/hooks/useDialogFocus"
 
@@ -22,7 +22,6 @@ export default function QuickViewModal({
     {}
   )
   const [activeImageIndex, setActiveImageIndex] = useState(0)
-  const [addedToCart, setAddedToCart] = useState(false)
   const { addToCart, cartError, getAvailableStock } = useCart()
   const dialogRef = useDialogFocus(true, onClose)
 
@@ -34,19 +33,11 @@ export default function QuickViewModal({
         : {}
     )
     setActiveImageIndex(0)
-    setAddedToCart(false)
   }, [product])
 
-  const selectedVariant: ProductVariant | undefined = product.variants.find(
-    (variant) => {
-      const optionValues = getVariantOptionValues(
-        variant.title,
-        product.options
-      )
-      return product.options.every(
-        (option) => optionValues[option.title] === selectedOptions[option.title]
-      )
-    }
+  const selectedVariant: ProductVariant | undefined = findVariantByOptions(
+    product,
+    selectedOptions
   )
   const variant = selectedVariant
   const availableStock = variant
@@ -156,6 +147,11 @@ export default function QuickViewModal({
           <div>
             <h3 className="break-words text-2xl font-bold">{product.title}</h3>
             <p className="mt-3 text-gray-600">{product.description}</p>
+            {variant && (
+              <p className="mt-3 text-sm text-gray-600">
+                Selected variant: {variant.title} · SKU: {variant.sku}
+              </p>
+            )}
 
             <div className="mt-6 space-y-4">
               {product.options.map((option) => (
@@ -222,7 +218,7 @@ export default function QuickViewModal({
               }}
               className="mt-5 w-full rounded-md bg-black px-4 py-3 text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {addedToCart ? "Added to cart" : "Add to Cart"}
+              Add to Cart
             </button>
           </div>
         </div>

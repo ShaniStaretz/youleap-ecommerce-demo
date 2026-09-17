@@ -14,13 +14,27 @@ export function getVariantOptionValues(
   return Object.fromEntries(
     options
       .map((option) => {
-        const value = option.values.find((optionValue) =>
-          normalizedTitle.includes(optionValue.toLowerCase())
-        )
+        const value = [...option.values]
+          .sort((first, second) => second.length - first.length)
+          .find((optionValue) =>
+            normalizedTitle.includes(optionValue.toLowerCase())
+          )
         return value ? [option.title, value] : null
       })
       .filter((entry): entry is [string, string] => entry !== null)
   )
+}
+
+export function findVariantByOptions(
+  product: Product,
+  selectedOptions: VariantOptionValues
+): ProductVariant | undefined {
+  return product.variants.find((variant) => {
+    const optionValues = getVariantOptionValues(variant.title, product.options)
+    return product.options.every(
+      (option) => optionValues[option.title] === selectedOptions[option.title]
+    )
+  })
 }
 
 export function toCatalogVariant(

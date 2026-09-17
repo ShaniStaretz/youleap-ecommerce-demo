@@ -28,6 +28,7 @@
 - Missing or invalid prices show `Price unavailable`.
 - UI catalog types add structured `option_values` without changing protected API types.
 - Cart items use the exact `variantId`.
+- Quick View matches the selected option combination to one exact variant and displays its title, SKU, price, stock, and cart identity.
 - Fully out-of-stock products are hidden from the grid.
 
 ### Validation and Accessibility
