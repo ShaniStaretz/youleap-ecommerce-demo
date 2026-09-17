@@ -22,30 +22,10 @@ type FilterOption = {
   count: number
 }
 
-function buildFilterOptions(products: Product[]): {
+type FilterAggregationsResponse = {
+  total: number
   collections: FilterOption[]
   tags: FilterOption[]
-} {
-  const collectionCounts = new Map<string, number>()
-  const tagCounts = new Map<string, number>()
-  products.forEach((product) => {
-    const collection = product.collection.handle
-    collectionCounts.set(collection, (collectionCounts.get(collection) ?? 0) + 1)
-    product.tags.forEach((productTag) => {
-      tagCounts.set(productTag.value, (tagCounts.get(productTag.value) ?? 0) + 1)
-    })
-  })
-
-  const sortOptions = (counts: Map<string, number>) =>
-    Array.from(counts, ([value, count]) => ({ value, count })).sort(
-      (first, second) =>
-        second.count - first.count || first.value.localeCompare(second.value)
-    )
-
-  return {
-    collections: sortOptions(collectionCounts),
-    tags: sortOptions(tagCounts),
-  }
 }
 
 async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
@@ -95,6 +75,8 @@ export default function ProductsPage({
   const [isLoading, setIsLoading] = useState(false)
   const [productError, setProductError] = useState("")
   const [productRetry, setProductRetry] = useState(0)
+  const [filterRetry, setFilterRetry] = useState(0)
+  const [filterError, setFilterError] = useState("")
   const [collectionOptions, setCollectionOptions] = useState<FilterOption[]>([])
   const [tagOptions, setTagOptions] = useState<FilterOption[]>([])
   const [collectionsExpanded, setCollectionsExpanded] = useState(false)
@@ -213,11 +195,6 @@ export default function ProductsPage({
               : [...(currentProducts ?? []), ...availableProducts]
           )
           setTotalProducts(data.count)
-          if (offset === 0) {
-            const options = buildFilterOptions(data.products)
-            setCollectionOptions(options.collections)
-            setTagOptions(options.tags)
-          }
         })
         .catch((error: unknown) => {
           if (
@@ -247,6 +224,39 @@ export default function ProductsPage({
       controller.abort()
     }
   }, [collection, limit, offset, productRetry, search, tag])
+
+  useEffect(() => {
+    if (offset !== 0) {
+      return
+    }
+
+    const params = new URLSearchParams()
+    if (search.trim()) params.set("q", search.trim())
+    if (collection) params.set("collection", collection)
+    if (tag) params.set("tag", tag)
+    const controller = new AbortController()
+
+    setFilterError("")
+    fetchJson<FilterAggregationsResponse>(
+      `/api/products/filters${params.size ? `?${params}` : ""}`,
+      controller.signal
+    )
+      .then((data) => {
+        setTotalProducts(data.total)
+        setCollectionOptions(data.collections)
+        setTagOptions(data.tags)
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return
+        }
+        setFilterError(
+          error instanceof Error ? error.message : "Unable to load filters."
+        )
+      })
+
+    return () => controller.abort()
+  }, [collection, filterRetry, offset, search, tag])
 
   const hasMoreProducts = offset + limit < totalProducts
 
@@ -496,6 +506,18 @@ export default function ProductsPage({
               <button
                 type="button"
                 onClick={() => setProductRetry((retry) => retry + 1)}
+                className="mt-2 underline"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+          {filterError && (
+            <div role="alert" className="mb-6 text-sm text-red-600">
+              <p>{filterError}</p>
+              <button
+                type="button"
+                onClick={() => setFilterRetry((retry) => retry + 1)}
                 className="mt-2 underline"
               >
                 Try again

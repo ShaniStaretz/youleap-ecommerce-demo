@@ -55,7 +55,7 @@ A starter `ProductCard` component is provided in `src/components/`. Use it, modi
 
 - Existing endpoint: `GET /api/products` remains the product-list endpoint.
 - Existing endpoint: `GET /api/products/:id` remains the single-product endpoint.
-- No new REST endpoints were added.
+- New endpoint: `GET /api/products/filters` returns server-calculated filter counts.
 - Search and filter controls use the existing product-list query parameters.
 - Cart, checkout, stock tracking, and Quick View state are client-side; they do not add API routes.
 
@@ -83,6 +83,19 @@ Returns a paginated list of products.
 ```
 
 `count` is the number of products matching the active query and filters. The example value is based on the current mock catalog and may change with the data.
+
+### `GET /api/products/filters`
+
+Returns filter counts for the active search, collection, and tag filters. This keeps aggregation work on the server instead of loading a large product page into the browser.
+
+**Response:**
+```json
+{
+   "total": 26,
+   "collections": [{ "value": "audio", "count": 6 }],
+   "tags": [{ "value": "electronics", "count": 8 }]
+}
+```
 
 ### `GET /api/products/:id`
 

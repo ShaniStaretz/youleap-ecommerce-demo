@@ -61,6 +61,28 @@
         }
       }
     },
+    "/api/products/filters": {
+      "get": {
+        "operationId": "getProductFilterAggregations",
+        "summary": "Get product filter aggregations",
+        "description": "Returns server-calculated totals and collection/tag counts for active filters.",
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "collection", "in": "query", "schema": { "type": "string" } },
+          { "name": "tag", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filter aggregations",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProductFilterAggregations" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/products/{id}": {
       "get": {
         "operationId": "getProduct",
@@ -191,6 +213,23 @@
         "required": ["product"],
         "properties": {
           "product": { "$ref": "#/components/schemas/Product" }
+        }
+      },
+      "FilterOption": {
+        "type": "object",
+        "required": ["value", "count"],
+        "properties": {
+          "value": { "type": "string" },
+          "count": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "ProductFilterAggregations": {
+        "type": "object",
+        "required": ["total", "collections", "tags"],
+        "properties": {
+          "total": { "type": "integer", "minimum": 0 },
+          "collections": { "type": "array", "items": { "$ref": "#/components/schemas/FilterOption" } },
+          "tags": { "type": "array", "items": { "$ref": "#/components/schemas/FilterOption" } }
         }
       }
     }
