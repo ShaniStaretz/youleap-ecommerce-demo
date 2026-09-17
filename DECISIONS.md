@@ -81,14 +81,14 @@
 
 ## Verification
 
-- `pnpm install --frozen-lockfile` succeeds.
-- `pnpm typecheck` passes.
-- `pnpm lint` passes.
-- `pnpm build` passes.
-- OpenAPI JSON parses successfully.
-- Protected paths match the original baseline.
-- Product, Quick View, cart, checkout, 404, 500, stock, and retry flows were reviewed manually.
-- Generated `.next` and TypeScript build artifacts are removed before submission.
+- `pnpm install --frozen-lockfile` confirms a clean clone can install the locked dependencies.
+- `pnpm typecheck` catches TypeScript errors before runtime.
+- `pnpm lint` checks code quality and project style rules.
+- `pnpm build` verifies the production bundle and all App Router routes compile.
+- OpenAPI JSON parsing confirms the API contract file is valid JSON.
+- Protected-path comparison confirms existing API routes, mock data, and shared product types were not changed.
+- Manual product-flow checks cover search, filters, pagination, Quick View, variants, cart, checkout, stock, 404, 500, and retry behavior.
+- Generated `.next` and TypeScript build artifacts are removed so they do not affect a clean submission.
 
 ## Surprises
 
