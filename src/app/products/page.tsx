@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { X } from "lucide-react"
+import { ArrowUp, X } from "lucide-react"
 import ProductCard from "@/components/ProductCard"
 import QuickViewModal from "@/components/QuickViewModal"
 import { hasAvailableVariant } from "@/lib/catalog"
@@ -101,6 +101,19 @@ export default function ProductsPage({
   const [tagsExpanded, setTagsExpanded] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [searchError, setSearchError] = useState("")
+  const [showBackToTop, setShowBackToTop] = useState(false)
+
+  useEffect(() => {
+    function updateBackToTopVisibility() {
+      setShowBackToTop(window.scrollY > 500)
+    }
+
+    updateBackToTopVisibility()
+    window.addEventListener("scroll", updateBackToTopVisibility, {
+      passive: true,
+    })
+    return () => window.removeEventListener("scroll", updateBackToTopVisibility)
+  }, [])
 
   useEffect(() => {
     function syncQuickViewFromUrl() {
@@ -237,7 +250,28 @@ export default function ProductsPage({
 
   const hasMoreProducts = offset + limit < totalProducts
 
+  function scrollListingToTop() {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    })
+  }
+
+  function scrollPageToTop() {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    })
+  }
+
   function handleCollectionChange(value: string) {
+    scrollListingToTop()
     setOffset(0)
     setCollection((currentCollection) =>
       currentCollection === value ? "" : value
@@ -245,6 +279,7 @@ export default function ProductsPage({
   }
 
   function handleTagChange(value: string) {
+    scrollListingToTop()
     setOffset(0)
     setTag((currentTag) => (currentTag === value ? "" : value))
   }
@@ -252,6 +287,7 @@ export default function ProductsPage({
   function handleLimitChange(value: string) {
     const nextLimit = Number(value)
     if (PAGE_SIZE_OPTIONS.includes(nextLimit)) {
+      scrollListingToTop()
       setOffset(0)
       setLimit(nextLimit)
     }
@@ -271,6 +307,7 @@ export default function ProductsPage({
   }
 
   function clearAllFilters() {
+    scrollListingToTop()
     setSearchInput("")
     setSearchError("")
     setSearch("")
@@ -465,6 +502,16 @@ export default function ProductsPage({
               </button>
             </div>
           )}
+          {products && products.length > 0 && (
+            <p className="mb-4 text-sm text-gray-600" aria-live="polite">
+              Showing {products.length} available products of {totalProducts}
+            </p>
+          )}
+          {!isLoading && !productError && !searchError && products?.length === 0 && (
+            <p className="mb-6 rounded-md border p-6 text-center text-gray-600">
+              No products match your current search and filters.
+            </p>
+          )}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
             {products?.map((product) => (
               <ProductCard
@@ -503,6 +550,16 @@ export default function ProductsPage({
             Try again
           </button>
         </div>
+      )}
+      {showBackToTop && (
+        <button
+          type="button"
+          aria-label="Back to top"
+          onClick={scrollPageToTop}
+          className="fixed bottom-5 right-5 z-40 rounded-full border bg-white p-3 shadow-lg transition hover:bg-gray-100"
+        >
+          <ArrowUp size={20} aria-hidden="true" />
+        </button>
       )}
     </main>
   )

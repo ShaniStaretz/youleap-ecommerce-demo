@@ -31,6 +31,11 @@
 - Quick View matches the selected option combination to one exact variant and displays its title, SKU, price, stock, and cart identity.
 - Fully out-of-stock products are hidden from the grid.
 - The sidebar provides `Clear all` for search and filter state, and the search input provides an accessible `×` clear button.
+- The grid shows the available-result count and a clear empty-results message.
+- Changing filters or page size scrolls the listing back to the top. Search typing does not force scrolling.
+- Scroll behavior respects `prefers-reduced-motion`: smooth for most users and instant for users who request less motion.
+- A keyboard-accessible Back to top button appears after scrolling down and uses the same reduced-motion behavior.
+- The cart modal includes a Clear cart action that resets cart and checkout state while preserving the session stock ledger.
 
 ### Validation and Accessibility
 

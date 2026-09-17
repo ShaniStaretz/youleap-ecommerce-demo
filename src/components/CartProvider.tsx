@@ -35,6 +35,7 @@ type CartContextValue = {
   cartError: string
   addToCart: (item: AddToCartInput) => boolean
   getAvailableStock: (variantId: string, fallback: number) => number
+  clearCart: () => void
   removeFromCart: (id: string) => void
   setQuantity: (id: string, quantity: number) => void
 }
@@ -177,6 +178,13 @@ export default function CartProvider({ children }: { children: React.ReactNode }
         return true
       },
       getAvailableStock: (variantId, fallback) => stockByVariant[variantId] ?? fallback,
+      clearCart: () => {
+        setItems([])
+        setIsCheckoutOpen(false)
+        setCheckoutMessage("")
+        setCheckoutErrors({})
+        setCartError("")
+      },
       removeFromCart: (id) => setItems((current) => current.filter((item) => item.id !== id)),
       setQuantity: (id, quantity) =>
         setItems((current) =>
@@ -352,6 +360,13 @@ export default function CartProvider({ children }: { children: React.ReactNode }
               </ul>
               {cartError && <p role="alert" className="mt-4 text-sm text-red-700">{cartError}</p>}
               <p className="mt-6 text-right text-lg font-bold">Total: {formatPrice({ amount: cart.total, currency_code: cart.items[0].price.currency_code })}</p>
+              <button
+                type="button"
+                onClick={cart.clearCart}
+                className="mt-3 w-full rounded-md border px-4 py-2 text-sm font-medium"
+              >
+                Clear cart
+              </button>
               {!isCheckoutOpen ? (
                 <button
                   type="button"
