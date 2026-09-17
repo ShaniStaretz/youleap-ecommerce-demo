@@ -46,13 +46,14 @@
 
 - React state handles search, filters, pagination, Quick View, cart, and checkout.
 - Cart and checkout are client-only because no real order backend is required.
+- Cart items and the session stock ledger are persisted in `localStorage`, so they survive refreshes and browser restarts on the same device.
+- Stored data is parsed defensively; invalid storage is removed. Checkout and modal visibility remain transient UI state.
 - No new dependency was added; existing Zod and Lucide libraries are used.
 
 ## Tradeoffs
 
-- Cart stock is session-local. Production checkout must reserve inventory on the server.
+- Cart data is browser-local. Production checkout must reserve inventory and persist orders on the server.
 - Filter counts are limited to the product data returned by the protected API.
-- Cart data is not persisted across refreshes.
 - Filter state stays out of the page URL so request parameters remain visible in DevTools without changing navigation.
 - Automated tests were not added by request.
 

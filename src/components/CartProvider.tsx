@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react"
 import { z } from "zod"
@@ -40,6 +41,13 @@ type CartContextValue = {
 
 type CheckoutField = "name" | "address" | "city" | "postalCode"
 
+const CART_STORAGE_KEY = "youleap-cart"
+
+type StoredCart = {
+  items: CartItem[]
+  stockByVariant: Record<string, number>
+}
+
 function currentCurrency(items: CartItem[]): string | undefined {
   return items[0]?.price.currency_code
 }
@@ -69,6 +77,40 @@ export default function CartProvider({ children }: { children: React.ReactNode }
   const [checkoutErrors, setCheckoutErrors] = useState<Partial<Record<CheckoutField, string>>>({})
   const [cartError, setCartError] = useState("")
   const [stockByVariant, setStockByVariant] = useState<Record<string, number>>({})
+  const hasHydratedStorage = useRef(false)
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(CART_STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored) as Partial<StoredCart>
+        if (Array.isArray(parsed.items)) {
+          setItems(parsed.items)
+        }
+        if (parsed.stockByVariant && typeof parsed.stockByVariant === "object") {
+          setStockByVariant(parsed.stockByVariant)
+        }
+      }
+    } catch {
+      localStorage.removeItem(CART_STORAGE_KEY)
+    } finally {
+      hasHydratedStorage.current = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!hasHydratedStorage.current) {
+      return
+    }
+    try {
+      localStorage.setItem(
+        CART_STORAGE_KEY,
+        JSON.stringify({ items, stockByVariant } satisfies StoredCart)
+      )
+    } catch {
+      setCartError("Unable to save your cart in this browser.")
+    }
+  }, [items, stockByVariant])
 
   useEffect(() => {
     if (!cartMessage) {
