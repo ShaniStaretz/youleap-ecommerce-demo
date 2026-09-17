@@ -1,6 +1,10 @@
 import type { Product, ProductVariant } from "@/types/product"
 import type { CatalogProduct, CatalogVariant, VariantOptionValues } from "@/types/catalog"
 
+export function hasAvailableVariant(product: Product): boolean {
+  return product.variants.some((variant) => variant.inventory_quantity > 0)
+}
+
 export function getVariantOptionValues(
   variantTitle: string,
   options: Product["options"]

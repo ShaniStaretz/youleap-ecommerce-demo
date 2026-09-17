@@ -7,6 +7,7 @@ import {
 } from "react"
 import ProductCard from "@/components/ProductCard"
 import QuickViewModal from "@/components/QuickViewModal"
+import { hasAvailableVariant } from "@/lib/catalog"
 import type { Product, ProductsResponse } from "@/types/product"
 
 const SEARCH_PATTERN = /^[\p{L}\p{N}\s'.,:&()+\-/_]{0,100}$/u
@@ -19,10 +20,30 @@ type FilterOption = {
   count: number
 }
 
-type FilterAggregationsResponse = {
-  total: number
+function buildFilterOptions(products: Product[]): {
   collections: FilterOption[]
   tags: FilterOption[]
+} {
+  const collectionCounts = new Map<string, number>()
+  const tagCounts = new Map<string, number>()
+  products.forEach((product) => {
+    const collection = product.collection.handle
+    collectionCounts.set(collection, (collectionCounts.get(collection) ?? 0) + 1)
+    product.tags.forEach((productTag) => {
+      tagCounts.set(productTag.value, (tagCounts.get(productTag.value) ?? 0) + 1)
+    })
+  })
+
+  const sortOptions = (counts: Map<string, number>) =>
+    Array.from(counts, ([value, count]) => ({ value, count })).sort(
+      (first, second) =>
+        second.count - first.count || first.value.localeCompare(second.value)
+    )
+
+  return {
+    collections: sortOptions(collectionCounts),
+    tags: sortOptions(tagCounts),
+  }
 }
 
 async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
@@ -33,6 +54,9 @@ async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
     | null
 
   if (!response.ok) {
+    if (response.status === 500) {
+      throw new Error("The server is temporarily unavailable. Please try again.")
+    }
     const message =
       body && typeof body === "object" && "error" in body && body.error
         ? body.error
@@ -64,7 +88,6 @@ export default function ProductsPage({
   const [totalProducts, setTotalProducts] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [productError, setProductError] = useState("")
-  const [filterError, setFilterError] = useState("")
   const [collectionOptions, setCollectionOptions] = useState<FilterOption[]>([])
   const [tagOptions, setTagOptions] = useState<FilterOption[]>([])
   const [collectionsExpanded, setCollectionsExpanded] = useState(false)
@@ -153,23 +176,9 @@ export default function ProductsPage({
     if (tag) {
       params.set("tag", tag)
     }
-    const filterParams = new URLSearchParams()
-    if (normalizedSearch) {
-      filterParams.set("q", normalizedSearch)
-    }
-    if (collection) {
-      filterParams.set("collection", collection)
-    }
-    if (tag) {
-      filterParams.set("tag", tag)
-    }
-
     const controller = new AbortController()
     setIsLoading(true)
     setProductError("")
-    if (offset === 0) {
-      setFilterError("")
-    }
     const timeout = setTimeout(() => {
       fetchJson<ProductsResponse>(`/api/products?${params}`, controller.signal)
         .then((data) => {
@@ -177,12 +186,18 @@ export default function ProductsPage({
             return
           }
 
+          const availableProducts = data.products.filter(hasAvailableVariant)
           setProducts((currentProducts) =>
             offset === 0
-              ? data.products
-              : [...(currentProducts ?? []), ...data.products]
+              ? availableProducts
+              : [...(currentProducts ?? []), ...availableProducts]
           )
           setTotalProducts(data.count)
+          if (offset === 0) {
+            const options = buildFilterOptions(data.products)
+            setCollectionOptions(options.collections)
+            setTagOptions(options.tags)
+          }
         })
         .catch((error: unknown) => {
           if (
@@ -205,35 +220,6 @@ export default function ProductsPage({
           }
         })
 
-      if (offset === 0) {
-        fetchJson<FilterAggregationsResponse>(
-          `/api/products/filters${filterParams.size ? `?${filterParams}` : ""}`,
-          controller.signal
-        )
-          .then((data) => {
-            if (sequence !== requestSequence.current) {
-              return
-            }
-            setTotalProducts(data.total)
-            setCollectionOptions(data.collections)
-            setTagOptions(data.tags)
-          })
-          .catch((error: unknown) => {
-            if (
-              error instanceof DOMException &&
-              error.name === "AbortError"
-            ) {
-              return
-            }
-            if (sequence === requestSequence.current) {
-              setFilterError(
-                error instanceof Error
-                  ? error.message
-                  : "Unable to load filters."
-              )
-            }
-          })
-      }
     }, 300)
 
     return () => {
@@ -242,7 +228,7 @@ export default function ProductsPage({
     }
   }, [collection, limit, offset, search, tag])
 
-  const hasMoreProducts = (products?.length ?? 0) < totalProducts
+  const hasMoreProducts = offset + limit < totalProducts
 
   function handleCollectionChange(value: string) {
     setOffset(0)
@@ -433,11 +419,6 @@ export default function ProductsPage({
           {productError && (
             <p role="alert" className="mb-6 text-sm text-red-600">
               {productError}
-            </p>
-          )}
-          {filterError && (
-            <p role="status" className="mb-6 text-sm text-amber-700">
-              Filters are unavailable: {filterError}
             </p>
           )}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
