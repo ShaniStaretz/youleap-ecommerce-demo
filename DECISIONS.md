@@ -32,6 +32,7 @@
 
 - Added validation for `limit` and `offset`.
 - Shared HTTP status constants live outside the protected API directory; frontend 500 handling uses `HTTP_INTERNAL_SERVER_ERROR` instead of a raw status literal while protected route files remain unchanged.
+- Frontend 404 handling uses the shared `HTTP_NOT_FOUND` constant and presents a clear not-found message, while the protected API route remains unchanged.
 - `limit` must be a positive integer and `offset` must be a non-negative integer; invalid values return HTTP 400.
 - Collection and tag filters are trimmed and compared case-insensitively.
 - Added a toggleable product filter sidebar with live search and collection/tag checkbox filters. Search validation uses a bounded allowlist regex before building the `q` query parameter. Invalid search input shows a local error and returns before `fetch`, which prevents malformed or control-character input from reaching the API. The pattern is intentionally restrictive and linear-time to avoid regex backtracking risks; normal letters, numbers, spaces, and common punctuation remain supported.
