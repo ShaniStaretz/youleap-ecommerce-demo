@@ -80,6 +80,7 @@ export default function ProductsPage({
     initialQuickViewId ?? null
   )
   const [quickViewError, setQuickViewError] = useState("")
+  const [quickViewRetry, setQuickViewRetry] = useState(0)
   const [searchInput, setSearchInput] = useState("")
   const [search, setSearch] = useState("")
   const [collection, setCollection] = useState("")
@@ -89,6 +90,7 @@ export default function ProductsPage({
   const [totalProducts, setTotalProducts] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [productError, setProductError] = useState("")
+  const [productRetry, setProductRetry] = useState(0)
   const [collectionOptions, setCollectionOptions] = useState<FilterOption[]>([])
   const [tagOptions, setTagOptions] = useState<FilterOption[]>([])
   const [collectionsExpanded, setCollectionsExpanded] = useState(false)
@@ -144,7 +146,7 @@ export default function ProductsPage({
       })
 
     return () => controller.abort()
-  }, [products, quickViewId])
+  }, [products, quickViewId, quickViewRetry])
 
   useEffect(() => {
     setSearchInput(search)
@@ -227,7 +229,7 @@ export default function ProductsPage({
       clearTimeout(timeout)
       controller.abort()
     }
-  }, [collection, limit, offset, search, tag])
+  }, [collection, limit, offset, productRetry, search, tag])
 
   const hasMoreProducts = offset + limit < totalProducts
 
@@ -418,9 +420,16 @@ export default function ProductsPage({
             </p>
           )}
           {productError && (
-            <p role="alert" className="mb-6 text-sm text-red-600">
-              {productError}
-            </p>
+            <div role="alert" className="mb-6 text-sm text-red-600">
+              <p>{productError}</p>
+              <button
+                type="button"
+                onClick={() => setProductRetry((retry) => retry + 1)}
+                className="mt-2 underline"
+              >
+                Try again
+              </button>
+            </div>
           )}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
             {products?.map((product) => (
@@ -450,9 +459,16 @@ export default function ProductsPage({
         />
       )}
       {quickViewError && (
-        <p role="alert" className="mt-6 text-sm text-red-700">
-          {quickViewError}
-        </p>
+        <div role="alert" className="mt-6 text-sm text-red-700">
+          <p>{quickViewError}</p>
+          <button
+            type="button"
+            onClick={() => setQuickViewRetry((retry) => retry + 1)}
+            className="mt-2 underline"
+          >
+            Try again
+          </button>
+        </div>
       )}
     </main>
   )

@@ -64,6 +64,7 @@
 - Search, collection, tag, and pagination offset are kept in local React state. They are still serialized into request query parameters, so the values are visible in browser DevTools without changing the page URL. This keeps the page URL clean, at the cost of losing filter state on refresh and browser navigation.
 - Search and filter requests are debounced and stale requests are aborted so rapid input changes do not overwrite newer results.
 - API responses are checked for non-2xx status codes before being cast to success types. HTTP 500 responses are converted into a user-facing retry message, while other errors retain their API message when available.
+- Product-list and Quick View failures expose a `Try again` action, so transient network or server errors do not force a full page refresh. Aborted requests remain silent because they are expected during rapid query changes.
 - A request sequence ID is checked alongside `AbortController` so an older request cannot update loading, product, filter, or error state after a newer URL query has started.
 - `ProductCard` uses the shared `Product` type rather than an untyped `any` prop.
 - No additional state-management library was added. Cart and checkout state are local to the client provider because the task explicitly requires no real checkout backend.
