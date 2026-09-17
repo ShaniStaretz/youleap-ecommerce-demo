@@ -16,6 +16,7 @@
 ### Data Fetching
 
 - The products page uses `GET /api/products` for search, filters, and pagination.
+- Filter UI is isolated in `ProductFilters.tsx`, keeping the products page focused on data fetching and page state.
 - Filter options are loaded from `/api/products/filters`, so counts are calculated server-side and are not limited to the visible page.
 - `openapi.json` documents the existing product routes and the new filter aggregation route.
 - Product requests use `AbortController` and a request sequence guard.

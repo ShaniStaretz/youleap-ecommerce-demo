@@ -8,19 +8,14 @@ import {
 import { ArrowUp, X } from "lucide-react"
 import ProductCard from "@/components/ProductCard"
 import QuickViewModal from "@/components/QuickViewModal"
+import ProductFilters, { type FilterOption } from "@/components/ProductFilters"
 import { hasAvailableVariant } from "@/lib/catalog"
 import { HTTP_INTERNAL_SERVER_ERROR, HTTP_NOT_FOUND } from "@/lib/http"
 import type { Product, ProductsResponse } from "@/types/product"
 
 const SEARCH_PATTERN = /^[\p{L}\p{N}\s'.,:&()+\-/_]{0,100}$/u
-const INITIAL_FILTER_OPTION_COUNT = 3
 const DEFAULT_PAGE_SIZE = 12
 const PAGE_SIZE_OPTIONS = [5, 10, DEFAULT_PAGE_SIZE, 20]
-
-type FilterOption = {
-  value: string
-  count: number
-}
 
 type FilterAggregationsResponse = {
   total: number
@@ -361,100 +356,19 @@ export default function ProductsPage({
         }`}
       >
         {filtersOpen && (
-          <aside
-            id="product-filters"
-            className="rounded-lg border p-4 lg:sticky lg:top-6 lg:self-start"
-          >
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="font-semibold">Filters</h2>
-              <button
-                type="button"
-                onClick={clearAllFilters}
-                className="text-sm font-medium underline"
-              >
-                Clear all
-              </button>
-            </div>
-            <fieldset className="mb-6">
-              <legend className="mb-2 text-sm font-medium">Collection</legend>
-              <label className="mb-2 flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={!collection}
-                  onChange={() => {
-                    setOffset(0)
-                    setCollection("")
-                  }}
-                />
-                All collections
-              </label>
-              {collectionOptions.map((option, index) => (
-                <label
-                  key={option.value}
-                  className={`${collectionsExpanded || index < INITIAL_FILTER_OPTION_COUNT ? "flex" : "hidden lg:flex"} mb-2 items-center gap-2 text-sm`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={collection === option.value}
-                    onChange={() => handleCollectionChange(option.value)}
-                  />
-                  <span>{option.value}</span>
-                  <span className="text-xs text-gray-500">({option.count})</span>
-                </label>
-              ))}
-              {collectionOptions.length > INITIAL_FILTER_OPTION_COUNT && (
-                <button
-                  type="button"
-                  onClick={() => setCollectionsExpanded((isExpanded) => !isExpanded)}
-                  className="text-sm font-medium underline lg:hidden"
-                >
-                  {collectionsExpanded
-                    ? "Show less"
-                    : `Load more ${collectionOptions.length - INITIAL_FILTER_OPTION_COUNT}`}
-                </button>
-              )}
-            </fieldset>
-
-            <fieldset>
-              <legend className="mb-2 text-sm font-medium">Tag</legend>
-              <label className="mb-2 flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={!tag}
-                  onChange={() => {
-                    setOffset(0)
-                    setTag("")
-                  }}
-                />
-                All tags
-              </label>
-              {tagOptions.map((option, index) => (
-                <label
-                  key={option.value}
-                  className={`${tagsExpanded || index < INITIAL_FILTER_OPTION_COUNT ? "flex" : "hidden lg:flex"} mb-2 items-center gap-2 text-sm`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={tag === option.value}
-                    onChange={() => handleTagChange(option.value)}
-                  />
-                  <span>{option.value}</span>
-                  <span className="text-xs text-gray-500">({option.count})</span>
-                </label>
-              ))}
-              {tagOptions.length > INITIAL_FILTER_OPTION_COUNT && (
-                <button
-                  type="button"
-                  onClick={() => setTagsExpanded((isExpanded) => !isExpanded)}
-                  className="text-sm font-medium underline lg:hidden"
-                >
-                  {tagsExpanded
-                    ? "Show less"
-                    : `Load more ${tagOptions.length - INITIAL_FILTER_OPTION_COUNT}`}
-                </button>
-              )}
-            </fieldset>
-          </aside>
+          <ProductFilters
+            collection={collection}
+            tag={tag}
+            collectionOptions={collectionOptions}
+            tagOptions={tagOptions}
+            collectionsExpanded={collectionsExpanded}
+            tagsExpanded={tagsExpanded}
+            onCollectionChange={handleCollectionChange}
+            onTagChange={handleTagChange}
+            onClearAll={clearAllFilters}
+            onToggleCollections={() => setCollectionsExpanded((isExpanded) => !isExpanded)}
+            onToggleTags={() => setTagsExpanded((isExpanded) => !isExpanded)}
+          />
         )}
 
         <section className="min-w-0">
