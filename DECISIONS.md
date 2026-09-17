@@ -70,6 +70,14 @@
 - Filter aggregation uses a separate server request, avoiding large client-side aggregation work.
 - Filter state stays out of the page URL so request parameters remain visible in DevTools without changing navigation.
 - Automated tests were not added by request.
+- With more time, I would add focused API/component tests and server-render the initial results.
+- I would add PostgreSQL with Prisma migrations, transactional inventory updates, and durable orders.
+- I would add authentication with `customer` and `admin` roles.
+- I would add admin screens for products, variants, stock changes, and audit history.
+- I would add structured logging, request IDs, monitoring, and centralized error reporting.
+- I would add Docker and Docker Compose for the app and database, plus a documented deployment pipeline.
+- I would add personalized recommendations before checkout based on the current cart and after checkout based on the user's previous orders.
+- With persisted order history, recommendations could start with simple complementary-product rules and later evolve into a recommendation service.
 
 ## Verification
 
