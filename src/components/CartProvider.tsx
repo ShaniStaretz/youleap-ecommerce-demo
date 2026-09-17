@@ -43,8 +43,10 @@ type CartContextValue = {
 type CheckoutField = "name" | "address" | "city" | "postalCode"
 
 const CART_STORAGE_KEY = "youleap-cart"
+const CART_STORAGE_VERSION = 1
 
 type StoredCart = {
+  version: number
   items: CartItem[]
   stockByVariant: Record<string, number>
 }
@@ -85,10 +87,14 @@ export default function CartProvider({ children }: { children: React.ReactNode }
       const stored = localStorage.getItem(CART_STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored) as Partial<StoredCart>
-        if (Array.isArray(parsed.items)) {
+        if (parsed.version === CART_STORAGE_VERSION && Array.isArray(parsed.items)) {
           setItems(parsed.items)
         }
-        if (parsed.stockByVariant && typeof parsed.stockByVariant === "object") {
+        if (
+          parsed.version === CART_STORAGE_VERSION &&
+          parsed.stockByVariant &&
+          typeof parsed.stockByVariant === "object"
+        ) {
           setStockByVariant(parsed.stockByVariant)
         }
       }
@@ -106,7 +112,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
     try {
       localStorage.setItem(
         CART_STORAGE_KEY,
-        JSON.stringify({ items, stockByVariant } satisfies StoredCart)
+        JSON.stringify({ version: CART_STORAGE_VERSION, items, stockByVariant } satisfies StoredCart)
       )
     } catch {
       setCartError("Unable to save your cart in this browser.")

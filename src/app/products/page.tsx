@@ -512,6 +512,16 @@ export default function ProductsPage({
               </button>
             </div>
           )}
+          {isLoading && !products && (
+            <p role="status" className="mb-6 text-sm text-gray-600">
+              Loading products...
+            </p>
+          )}
+          {isLoading && products && (
+            <p role="status" className="mb-4 text-sm text-gray-600">
+              Updating results...
+            </p>
+          )}
           {filterError && (
             <div role="alert" className="mb-6 text-sm text-red-600">
               <p>{filterError}</p>

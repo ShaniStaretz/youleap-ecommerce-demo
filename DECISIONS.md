@@ -55,6 +55,9 @@
 - Cart and checkout are client-only because no real order backend is required.
 - Cart items and the session stock ledger are persisted in `localStorage`, so they survive refreshes and browser restarts on the same device.
 - Stored data is parsed defensively; invalid storage is removed. Checkout and modal visibility remain transient UI state.
+- Stored cart data includes a version number so future storage-shape changes can invalidate old browser data safely.
+- An App Router error boundary gives unexpected page failures a user-friendly retry action.
+- Initial loading and filter updates show visible status text.
 - No new dependency was added; existing Zod and Lucide libraries are used.
 
 ## Tradeoffs
