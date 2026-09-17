@@ -54,6 +54,7 @@
 - React state handles search, filters, pagination, Quick View, cart, and checkout.
 - Cart and checkout are client-only because no real order backend is required.
 - Cart items and the session stock ledger are persisted in `localStorage`, so they survive refreshes and browser restarts on the same device.
+- The cart uses the canonical `/cart` page path. Refreshing `/cart` restores the cart modal and reads its items from `localStorage`.
 - Stored data is parsed defensively; invalid storage is removed. Checkout and modal visibility remain transient UI state.
 - Stored cart data includes a version number so future storage-shape changes can invalidate old browser data safely.
 - An App Router error boundary gives unexpected page failures a user-friendly retry action.

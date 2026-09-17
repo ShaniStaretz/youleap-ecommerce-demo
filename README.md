@@ -56,6 +56,7 @@ A starter `ProductCard` component is provided in `src/components/`. Use it, modi
 - Existing endpoint: `GET /api/products` remains the product-list endpoint.
 - Existing endpoint: `GET /api/products/:id` remains the single-product endpoint.
 - New endpoint: `GET /api/products/filters` returns server-calculated filter counts.
+- New page route: `/cart` opens the cart modal and can be refreshed directly.
 - Search and filter controls use the existing product-list query parameters.
 - Cart, checkout, stock tracking, and Quick View state are client-side; they do not add API routes.
 

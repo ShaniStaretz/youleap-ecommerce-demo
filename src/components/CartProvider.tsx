@@ -80,6 +80,16 @@ export default function CartProvider({ children }: { children: React.ReactNode }
   const [checkoutErrors, setCheckoutErrors] = useState<Partial<Record<CheckoutField, string>>>({})
   const [cartError, setCartError] = useState("")
   const [stockByVariant, setStockByVariant] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    function syncCartUrl() {
+      setIsOpen(window.location.pathname === "/cart")
+    }
+
+    syncCartUrl()
+    window.addEventListener("popstate", syncCartUrl)
+    return () => window.removeEventListener("popstate", syncCartUrl)
+  }, [])
   const hasHydratedStorage = useRef(false)
 
   useEffect(() => {
@@ -127,7 +137,12 @@ export default function CartProvider({ children }: { children: React.ReactNode }
     return () => clearTimeout(timeout)
   }, [cartMessage])
 
-  const cartDialogRef = useDialogFocus(isOpen, () => setIsOpen(false))
+  function closeCart() {
+    window.history.replaceState({}, "", "/products")
+    setIsOpen(false)
+  }
+
+  const cartDialogRef = useDialogFocus(isOpen, closeCart)
 
   const cart = useMemo<CartContextValue>(() => {
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
@@ -210,9 +225,10 @@ export default function CartProvider({ children }: { children: React.ReactNode }
 
   function toggleCart() {
     if (isOpen) {
-      setIsOpen(false)
+      closeCart()
       return
     }
+    window.history.pushState({}, "", "/cart")
     setCheckoutMessage("")
     setIsOpen(true)
   }
@@ -301,7 +317,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
-              setIsOpen(false)
+              closeCart()
             }
           }}
         >
@@ -315,7 +331,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
           >
             <div className="mb-6 flex items-center justify-between gap-4">
               <h2 id="cart-title" className="text-xl font-bold">Your cart</h2>
-              <button type="button" onClick={() => setIsOpen(false)} className="rounded-md border px-3 py-1" aria-label="Close cart">
+              <button type="button" onClick={closeCart} className="rounded-md border px-3 py-1" aria-label="Close cart">
                 ×
               </button>
             </div>
@@ -338,7 +354,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
                       <div>
                         <Link
                           href={`/product/${encodeURIComponent(item.productId)}`}
-                          onClick={() => setIsOpen(false)}
+                          onClick={closeCart}
                           className="font-medium underline"
                         >
                           {item.productTitle}
