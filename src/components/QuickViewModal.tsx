@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { Product, ProductVariant } from "@/types/product"
 import { formatPrice, getVariantPrice } from "@/lib/pricing"
 import { getVariantOptionValues } from "@/lib/catalog"
@@ -20,7 +21,7 @@ export default function QuickViewModal({
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(
     {}
   )
-  const [activeImage, setActiveImage] = useState(product.thumbnail)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [addedToCart, setAddedToCart] = useState(false)
   const { addToCart, getAvailableStock } = useCart()
   const dialogRef = useDialogFocus(true, onClose)
@@ -32,7 +33,7 @@ export default function QuickViewModal({
         ? getVariantOptionValues(firstVariant.title, product.options)
         : {}
     )
-    setActiveImage(product.thumbnail)
+    setActiveImageIndex(0)
     setAddedToCart(false)
   }, [product])
 
@@ -55,6 +56,13 @@ export default function QuickViewModal({
   const images = product.images.length > 0
     ? product.images.map((image) => image.url)
     : [product.thumbnail]
+  const activeImage = images[activeImageIndex] ?? product.thumbnail
+
+  function changeImage(direction: -1 | 1) {
+    setActiveImageIndex((currentIndex) =>
+      (currentIndex + direction + images.length) % images.length
+    )
+  }
 
   return (
     <div
@@ -90,19 +98,42 @@ export default function QuickViewModal({
 
         <div className="grid gap-7 md:grid-cols-2">
           <div>
-            <Image
-              src={activeImage}
-              alt={product.title}
-              width={800}
-              height={800}
-              className="aspect-square w-full rounded-md object-cover"
-            />
+            <div className="relative">
+              <Image
+                src={activeImage}
+                alt={product.title}
+                width={800}
+                height={800}
+                className="aspect-square w-full rounded-md object-cover"
+              />
+              {images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Previous product image"
+                    onClick={() => changeImage(-1)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md"
+                  >
+                    <ChevronLeft size={20} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next product image"
+                    onClick={() => changeImage(1)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md"
+                  >
+                    <ChevronRight size={20} aria-hidden="true" />
+                  </button>
+                </>
+              )}
+            </div>
             <div className="mt-3 grid grid-cols-4 gap-2">
               {images.map((image) => (
                 <button
                   key={image}
                   type="button"
-                  onClick={() => setActiveImage(image)}
+                  onClick={() => setActiveImageIndex(images.indexOf(image))}
+                  aria-current={images[activeImageIndex] === image}
                   className="overflow-hidden rounded-md border"
                   aria-label={`View ${product.title} image`}
                 >
