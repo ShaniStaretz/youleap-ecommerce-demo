@@ -76,6 +76,17 @@ export function getProductFilterAggregations(
   }
 }
 
+export function listProducts(
+  filters: ProductFilters,
+  { limit, offset }: { limit: number; offset: number }
+): { products: Product[]; count: number } {
+  const filtered = filterProducts(filters)
+  return {
+    products: filtered.slice(offset, offset + limit),
+    count: filtered.length,
+  }
+}
+
 export function getProductById(id: string): Product | undefined {
   return productsData.find((product) => product.id === id)
 }

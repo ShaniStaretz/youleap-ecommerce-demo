@@ -1,16 +1,37 @@
-import ProductsPage from "@/app/products/page"
-import { getProductById } from "@/services/products"
 import { notFound } from "next/navigation"
+import ProductsListing from "@/components/products/ProductsListing"
+import { QuickViewRoute } from "@/components/routes/RouteDialogs"
+import type { RawProductParams } from "@/lib/productQuery"
+import { getProductById } from "@/services/products"
 
-export default async function ProductPage({
+export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id } = await params
-  if (!getProductById(id)) {
+  const product = getProductById((await params).id)
+  return product
+    ? { title: product.title, description: product.description }
+    : {}
+}
+
+// Direct visits and refreshes; in-app navigation is handled by @modal/(.)product/[id].
+export default async function ProductPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<RawProductParams>
+}) {
+  const product = getProductById((await params).id)
+  if (!product) {
     notFound()
   }
 
-  return <ProductsPage initialQuickViewId={id} />
+  return (
+    <>
+      <ProductsListing searchParams={searchParams} />
+      <QuickViewRoute product={product} intercepted={false} />
+    </>
+  )
 }

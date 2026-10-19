@@ -1,18 +1,9 @@
-"use client"
-
 import type { Product } from "@/types/product"
 import Image from "next/image"
+import Link from "next/link"
 import { formatPrice, getStartingPrice } from "@/lib/pricing"
 
-type ProductCardProps = {
-  product: Product
-  onQuickView: (product: Product) => void
-}
-
-export default function ProductCard({
-  product,
-  onQuickView,
-}: ProductCardProps) {
+export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="min-w-0 overflow-hidden rounded-lg border bg-white shadow-sm">
       <Image
@@ -27,13 +18,14 @@ export default function ProductCard({
         <p className="mt-1 text-gray-600">
           {formatPrice(getStartingPrice(product))}
         </p>
-        <button
-          type="button"
-          onClick={() => onQuickView(product)}
-          className="mt-3 w-full rounded-md bg-black py-2 text-white text-sm hover:bg-gray-800 transition-colors"
+        <Link
+          href={`/product/${encodeURIComponent(product.id)}`}
+          scroll={false}
+          aria-label={`Quick view ${product.title}`}
+          className="mt-3 block w-full rounded-md bg-black py-2 text-center text-white text-sm hover:bg-gray-800 transition-colors"
         >
           Quick View
-        </button>
+        </Link>
       </div>
     </div>
   )
